@@ -19,7 +19,7 @@ import MesonTo from '@mesonfi/to'
 You can also add it directly to the html file
 
 ```html
-<script src="./meson-to.js"></script>
+<script src="https://raw.githubusercontent.com/MesonFi/meson-to/main/lib/meson-to.js"></script>
 ```
 
 Once the script is loaded, you will be able to use `MesonTo` globally.
