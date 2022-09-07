@@ -1,0 +1,1 @@
+web: cd examples/meson-to-example-react && yarn build && yarn serve
