@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html class="w-full h-full">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="./favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="An example web3 app using meson.to" />
+    <title>Web3 App</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../../lib/meson-to.js"></script>
+  </head>
+  <body class="w-full h-full">
+    <div class="w-full h-full bg-indigo-50">
+      <header class="flex flex-row items-center w-full px-6 py-2">
+        <img class="h-8 mr-2" src="./icon192.png" />
+        <div>
+          <div class="text-lg">Web3 Application</div>
+          <div class="text-xs font-light text-gray">
+            An example to show deposit with meson
+          </div>
+        </div>
+      </header>
+      <div class="flex flex-col items-center">
+        <div class="bg-white mt-24 pt-12 pb-4 px-4 text-center sm:px-12">
+          <h2 class="tracking-tight text-gray-900">
+            <div class="font-bold text-2xl mb-2">
+              Ready to dive in?
+            </div>
+            <div class="block text-base">
+              Experience <b>Web 3.0</b> with stablecoins.
+            </div>
+          </h2>
+          <div class="mt-8 flex justify-center">
+            <button class="items-center justify-center rounded-md px-3 py-2 sm:px-4 sm:py-3 font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+              Get started
+            </button>
+            <button class="ml-3 items-center justify-center rounded-md px-3 py-2 sm:px-4 sm:py-3 font-medium bg-emerald-100 hover:bg-emerald-200 text-emerald-600" onclick="onClickMesonTo(this)">
+              Deposit with meson
+            </button>
+          </div>
+          <div id="received-display" class="mt-2 sm:mt-6"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    const meson2 = new MesonTo(window)
+
+    meson2.onCompleted(data => {
+      document.getElementById('received-display').innerHTML =
+        `Received ${data.amount / 1e6} ${data.from.token} from ${data.fromAddress} of ${data.from.chain}.`
+    })
+
+    function onClickMesonTo (btn) {
+      const btnText = btn.innerHTML
+      btn.disabled = true
+      btn.innerHTML = 'Waiting for meson...'
+      meson2.open('example').then(() => {
+        btn.disabled = false
+        btn.innerHTML = btnText
+      })
+    }
+  </script>
+</html>
