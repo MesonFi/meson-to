@@ -10,19 +10,38 @@ Get a feel for how MesonTo works with this [demo](https://demo.meson.to).
 
 ### Frontend
 
-Add MesonTo to your frontend project through `npm i -S @mesonfi/to` or `yarn add @mesonfi/to`. Then import `MesonTo` by
+#### React
+
+Add the npm package `@mesonfi/to` to your frontend project through `npm i -S @mesonfi/to` or `yarn add @mesonfi/to`. Then integrate it to your frontend project 
 
 ```js
-import MesonTo from '@mesonfi/to'
+import { MesonToButton } from '@mesonfi/to/react'
+
+export default function App () {
+  const onCompleted = data => {
+    // when a cross-chain transfer is successful
+    console.log(data)
+  }
+
+  return <MesonToButton appId='example' onCompleted={onCompleted} />
+}
 ```
 
-You can also add it directly to the html file
+See a complete example in `examples/meson-to-example-react`
+
+#### Plain HTML & JavaScript
+
+You can also add MesonTo directly to the html file
 
 ```html
 <script src="https://raw.githubusercontent.com/MesonFi/meson-to/main/lib/meson-to.js"></script>
 ```
 
-Once the script is loaded, you will be able to use `MesonTo` globally.
+Once the script is loaded, you will be able to use `MesonTo` globally. If you use a package manager for your frontend project, you can also import it through
+
+```js
+import MesonTo from '@mesonfi/to'
+```
 
 To open the popup of MesonTo for cross-chain transfer, run
 
@@ -40,7 +59,7 @@ meson2.onCompleted(data => {
 })
 ```
 
-There are complete examples of how to use MesonTo in the `examples` folder.
+See the example project in `examples/plain`.
 
 ### Smart contract
 

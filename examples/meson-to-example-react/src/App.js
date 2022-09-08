@@ -1,25 +1,12 @@
 import React from 'react'
-import classnames from 'classnames'
 
-import MesonTo from '@mesonfi/to'
+import { MesonToButton } from '@mesonfi/to/react'
 
-export default function App() {
-  const [pending, setPending] = React.useState(false)
+export default function App(props) {
   const [received, setReceived] = React.useState('')
 
-  const meson2 = React.useMemo(() => new MesonTo(window), [])
-
-  React.useEffect(() => {
-    meson2.onCompleted(data => {
-      setReceived(`Received ${data.amount / 1e6} ${data.from.token} from ${data.fromAddress} of ${data.from.chain}.`)
-    })
-  }, [])
-
-  const onClick = React.useCallback(() => {
-    setPending(true)
-    meson2.open('example').then(() => {
-      setPending(false)
-    })
+  const onCompleted = React.useCallback(data => {
+    setReceived(`Received ${data.amount / 1e6} ${data.from.token} from ${data.fromAddress} of ${data.from.chain}.`)
   }, [])
 
   return (
@@ -44,26 +31,7 @@ export default function App() {
             </div>
           </h2>
           <div className='mt-8 flex justify-center'>
-            <button
-              className={classnames(
-                'items-center justify-center rounded-md px-3 py-2 sm:px-4 sm:py-3',
-                'font-medium text-white bg-indigo-600 hover:bg-indigo-700'
-              )}
-            >
-              Get started
-            </button>
-            <button
-              className={classnames(
-                'ml-3',
-                'items-center justify-center rounded-md px-3 py-2 sm:px-4 sm:py-3',
-                'font-medium bg-emerald-100',
-                pending ? 'opacity-60 text-emerald-800' : 'hover:bg-emerald-200 text-emerald-600'
-              )}
-              onClick={onClick}
-              disabled={pending}
-            >
-              {pending ? 'Waiting for meson...' : 'Deposit with meson'}
-            </button>
+            <MesonToButton appId='example' onCompleted={onCompleted} />
           </div>
           <div className='mt-2 sm:mt-6'>{received}</div>
         </div>

@@ -4,7 +4,8 @@
   "license": "MIT",
   "main": "src/index.js",
   "files": [
-    "lib"
+    "lib",
+    "react"
   ],
   "scripts": {
     "build": "webpack"
@@ -16,5 +17,9 @@
     "@babel/preset-env": "^7.19.0",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0"
+  },
+  "peerDependencies": {
+    "classnames": "*",
+    "prop-types": "*"
   }
 }

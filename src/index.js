@@ -5,9 +5,9 @@ class MesonTo {
       value: window,
       writable: false
     })
-    this._onWindowMsg = null
     this._popup = null
     this._promise = null
+    this._callback = null
   }
 
   open (appId) {
@@ -31,18 +31,23 @@ class MesonTo {
   }
 
   onCompleted (callback) {
-    if (this._onWindowMsg) {
+    if (this._callback) {
       throw new Error('meson2.onCompleted listener already registered')
     } else if (typeof callback !== 'function') {
       throw new Error('callback is not a valid function')
     }
 
-    this._onWindowMsg = this._.window.onmessage
-    this._.window.onmessage = msg => {
+    this._callback = msg => {
       if (msg.data && msg.data.source === 'meson.to') {
         callback(msg.data.data)
-      } else {
-        this._onWindowMsg && this._onWindowMsg(msg)
+      }
+    }
+
+    this._.window.addEventListener('message', this._callback)
+    return {
+      dispose: () => {
+        this._.window.removeEventListener('message', this._callback)
+        this._callback = null
       }
     }
   }
