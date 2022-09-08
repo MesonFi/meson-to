@@ -27,6 +27,26 @@ export default function App () {
 }
 ```
 
+If you want to customize the button, use
+```js
+// Customized button text
+function ButtonText ({ pending }) {
+  return pending ? '' : ''
+}
+
+export default function App () {
+  return (
+    <MesonToButton
+      appId='example'
+      onCompleted={data => {}}
+      className='btn-meson-to' // add a class name to customize styles
+    >
+      <ButtonText />
+    </MesonToButton>
+  )
+}
+```
+
 See a complete example in `examples/meson-to-example-react`
 
 #### Plain HTML & JavaScript

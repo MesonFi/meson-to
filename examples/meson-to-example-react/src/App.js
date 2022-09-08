@@ -30,12 +30,16 @@ export default function App(props) {
               Experience <b>Web 3.0</b> with stablecoins.
             </div>
           </h2>
-          <div className='mt-8 flex justify-center'>
-            <MesonToButton appId='example' onCompleted={onCompleted} />
-          </div>
+          <MesonToButton appId='example' onCompleted={onCompleted} className='mt-8'>
+            <ButtonText />
+          </MesonToButton>
           <div className='mt-2 sm:mt-6'>{received}</div>
         </div>
       </div>
     </div>
   )
+}
+
+function ButtonText ({ pending }) {
+  return pending ? 'Waiting for meson' : 'Deposit with meson'
 }

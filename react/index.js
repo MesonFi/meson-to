@@ -4,10 +4,10 @@ import PropTypes from 'prop-types';
 
 import MesonTo from '@mesonfi/to'
 
-import styles from './styles.module.css'
+import styles from './meson2.module.css'
 import { ReactComponent as Spinner } from './spinner.svg'
 
-export function MesonToButton ({ appId, onCompleted }) {
+export function MesonToButton ({ appId, onCompleted, className, children }) {
   const [pending, setPending] = React.useState(false)
 
   const meson2 = React.useMemo(() => new MesonTo(window), [])
@@ -24,25 +24,36 @@ export function MesonToButton ({ appId, onCompleted }) {
     return () => disposable.dispose()
   }, [meson2, onCompleted])
 
-  const children = []
+  const btnChildren = []
   if (pending) {
-    children.push(React.createElement(Spinner, {
+    btnChildren.push(React.createElement(Spinner, {
       key: 'spinner',
-      className: styles['meson-to-button-spinner']
+      className: styles['button-spinner']
     }))
   }
-  const btnText = pending ? 'Waiting for meson' : 'Deposit with meson'
-  children.push(btnText)
+  if (typeof children === 'string') {
+    btnChildren.push(children)
+  } else if (children) {
+    btnChildren.push(React.cloneElement(children, { pending }))
+  } else {
+    btnChildren.push(pending ? 'Waiting for meson' : 'Deposit with meson')
+  }
 
   return React.createElement('button', {
     onClick,
-    className: classnames(styles['meson-to-button'], pending && styles['meson-to-button-pending'])
-  }, children)
+    className: classnames(
+      styles.button,
+      pending && styles['button-pending'],
+      className
+    )
+  }, btnChildren)
 }
 
 MesonToButton.propTypes = {
   appId: PropTypes.string.isRequired,
-  onCompleted: PropTypes.func
+  onCompleted: PropTypes.func.isRequired,
+  className: PropTypes.string,
+  children: PropTypes.node,
 }
 
 MesonToButton.defaultProps = {

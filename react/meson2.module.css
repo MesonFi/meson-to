@@ -1,4 +1,4 @@
-.meson-to-button {
+.button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13,22 +13,22 @@
   cursor: pointer;
 }
 
-.meson-to-button:hover {
+.button:hover {
   opacity: 0.8;
 }
 
-.meson-to-button:active {
+.button:active {
   background: linear-gradient(to right, #05ae71, #06ae97);
 }
 
-.meson-to-button-pending,
-.meson-to-button-pending:hover,
-.meson-to-button-pending:active {
+.button-pending,
+.button-pending:hover,
+.button-pending:active {
   cursor: default;
   opacity: 0.4
 }
 
-.meson-to-button-spinner {
+.button-spinner {
   width: 18px;
   height: 18px;
   margin-right: 6px;
