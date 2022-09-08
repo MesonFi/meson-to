@@ -1537,10 +1537,10 @@
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@mesonfi/to@^0.1.0-rc.2":
-  version "0.1.0-rc.2"
-  resolved "https://registry.yarnpkg.com/@mesonfi/to/-/to-0.1.0-rc.2.tgz#f07ce5cc8de04d03b808ae3ccfec0017aaaeaf2f"
-  integrity sha512-RsdB9bcLbFz9ZczbU0h1XqrNQEfOlsfjcm6ILxV2yTiqVKzGAfpfVQ8FTPpNl7EurO3x6eZByrs3Zu2SGWlzGg==
+"@mesonfi/to@^0.1.1-rc.1":
+  version "0.1.1-rc.1"
+  resolved "https://registry.yarnpkg.com/@mesonfi/to/-/to-0.1.1-rc.1.tgz#846a55d36af75fc714959e9ffb161b0d90f0baf0"
+  integrity sha512-4ydqR4K4XDV6Zb1gptnTiJ/lIXixOvzux6sDTaEInJGbHucOpIqc01O5fv65J9JTpJ6A3gHy41ME+j/obQfvbg==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
