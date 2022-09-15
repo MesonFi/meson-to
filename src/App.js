@@ -3,7 +3,7 @@ import React from 'react'
 import { MesonToButton } from '@mesonfi/to/react'
 
 import { ReactComponent as MesonIcon } from './meson.svg'
-import popup from './popup.png'
+import popup from './popup.jpg'
 
 export default function App(props) {
   const [received, setReceived] = React.useState()
@@ -38,8 +38,8 @@ export default function App(props) {
           </div>
         </div>
 
-        <div className='md:row-span-4 md:col-span-2 flex flex-col items-center'>
-          <img className='w-[360px] md:w-[320px] md:min-w-[320px] lg:w-[360px]' src={popup} alt='meson.to popup' />
+        <div className='md:row-span-4 md:col-span-2 flex flex-col items-center p-5'>
+          <img className='w-[320px] md:w-[280px] md:min-w-[280px] lg:w-[320px] border-[0.5px] border-[#d2d6d6] rounded-xl shadow-[0_5px_40px_-10px_rgba(0,0,0,0.2)]' src={popup} alt='meson.to popup' />
         </div>
 
         <div className='md:col-span-3 mt-3 md:mt-8 md:pr-8 flex flex-col items-start'>
