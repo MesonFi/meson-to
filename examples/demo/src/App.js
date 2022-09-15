@@ -5,16 +5,19 @@ import { MesonToButton } from '@mesonfi/to/react'
 import { ReactComponent as MesonIcon } from './meson.svg'
 import popup from './popup.jpg'
 
-export default function App(props) {
-  const [received, setReceived] = React.useState()
+export default function App() {
+  const [data, setData] = React.useState(null)
 
-  const onCompleted = React.useCallback(data => {
-    setReceived(
-      <a className='flex items-center hover:underline' href={`https://explorer.meson.fi/swap/${data.swapId}`} target='_blank' rel="noreferrer">
-        {data.amount / 1e6} {data.from.token} transferred to <img className='h-4 ml-2 mr-1' src='/icon192.png' alt='' />Example Web3 App
-      </a>
-    )
-  }, [])
+  const completed = data && (
+    <a className='flex items-center hover:underline' href={`https://explorer.meson.fi/swap/${data.swapId}`} target='_blank' rel="noreferrer">
+      <span className='font-medium'>{data.amount / 1e6} {data.from.token} on {data.from.chain}</span>
+      <span className='mx-1.5 text-gray-300'>{'>'}</span>
+      <span className='font-medium'>{data.received / 1e6} {data.to.token} on {data.to.chain}</span>
+      <span className='mx-1.5 text-gray-300'>{'>'}</span>
+      <img className='h-4 mr-1' src='/icon192.png' alt='' />
+      <span className='font-medium'>Example Web3 App</span>
+    </a>
+  )
 
   return (
     <div className='w-full min-h-full bg-indigo-50 flex flex-col'>
@@ -53,14 +56,13 @@ export default function App(props) {
           <div>
             In this demo, you can use stablecoins from any chain and transfer them directly to app's smart contract on Polygon.
             This example contract will forward receiving tokens to the sender's address on Polygon.
-            {/* See an example transaction <a className='text-indigo-500 hover:underline cursor' target='_black' href='https://polygonscan.com/tx/0xe4c4d836a8b099c39c74b85ab65c632b6908146eedbf69095647907dbb180fa9'>here</a>. */}
           </div>
           <div>
-            <MesonToButton appId='example' onCompleted={onCompleted} className='mt-4 lg:mt-6'>
+            <MesonToButton appId='example' onCompleted={setData} className='mt-4 lg:mt-6'>
               <ButtonText />
             </MesonToButton>
           </div>
-          <div className='mt-3 text-gray-500'>{received}</div>
+          <div className='mt-3 text-gray-500 text-sm'>{completed}</div>
         </div>
       </div>
 
