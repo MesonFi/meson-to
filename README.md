@@ -47,7 +47,7 @@ export default function App () {
 }
 ```
 
-See a complete example in `examples/meson-to-example-react`
+See a complete example in `examples/demo`
 
 #### Plain HTML & JavaScript
 

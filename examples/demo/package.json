@@ -1,6 +1,6 @@
 {
-  "name": "meson-to-example-react",
-  "version": "0.1.1",
+  "name": "@mesonfi/to-demo",
+  "version": "0.1.2",
   "private": true,
   "dependencies": {
     "@mesonfi/to": "^0.1.2-rc.1",
