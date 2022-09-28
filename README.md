@@ -1,12 +1,12 @@
-# MesonTo
+# meson.to
 
 The blockchain world has entered a period of multi-chain coexistence. For web3 app developers, they often encounter a problem: they need to deploy smart contracts on a specific chain, but this will greatly limit them to attract assets and users on other chains.
 
-*MesonTo* has provided a solution for those web3 developers. [Meson](https://meson.fi) is a safe, costless and instant cross-chain protocol for stablecoins. MesonTo is an integratable sdk supported meson cross-chain protocol. With MesonTo, web3 applications can allow their users to transfer stablecoins from any chain directly to their smart contracts.
+[meson.to](https://meson.to) has provided a solution for those web3 developers. [Meson](https://meson.fi) is a safe, costless and instant cross-chain protocol for stablecoins. meson.to is an integratable sdk supported meson cross-chain protocol. With meson.to, web3 applications can allow their users to transfer stablecoins from any chain directly to their smart contracts.
 
-Get a feel for how MesonTo works with this [demo](https://demo.meson.to).
+Get a feel for how meson.to works with this [demo](https://demo.meson.to).
 
-## How to integrate MesonTo
+## How to integrate meson.to
 
 ### Frontend
 
@@ -23,7 +23,7 @@ export default function App () {
     console.log(data)
   }
 
-  return <MesonToButton appId='example' onCompleted={onCompleted} />
+  return <MesonToButton appId='demo' onCompleted={onCompleted} />
 }
 ```
 
@@ -37,7 +37,7 @@ function ButtonText ({ pending }) {
 export default function App () {
   return (
     <MesonToButton
-      appId='example'
+      appId='demo'
       onCompleted={data => {}}
       className='btn-meson-to' // add a class name to customize styles
     >
@@ -51,7 +51,7 @@ See a complete example in `examples/demo`
 
 #### Plain HTML & JavaScript
 
-You can also add MesonTo directly to the html file
+You can also add meson.to directly to the html file
 
 ```html
 <script src="https://raw.githubusercontent.com/MesonFi/meson-to/main/lib/meson-to.js"></script>
@@ -66,7 +66,7 @@ import MesonTo from '@mesonfi/to'
 To open the popup of MesonTo for cross-chain transfer, run
 
 ```js
-const appId = 'example'
+const appId = 'demo'
 const meson2 = new MesonTo(window)
 meson2.open(appId)
   .then(() => {
@@ -97,7 +97,7 @@ See an example in `contracts/SampleAppContract.sol`.
 
 In order to keep users' funds safe, we need to confirm that your contract has correctly supported `transferWithBeneficiary`. Otherwise, users' cross-chain assets may be stuck and cannot be withdrawn.
 
-Once `transferWithBeneficiary` is supported, you can [contact us]() to add your app to the MesonTo. Please have the following information ready
+Once `transferWithBeneficiary` is supported, you can [contact us]() to register your app. Please have the following information ready
 
 - App name
 - Prefered appId (popup will open at https://meson.to/{appId})
@@ -111,6 +111,6 @@ We will review and input your app's information within 24 hours. After that, you
 
 ## Dev mode & release mode
 
-In dev mode, MesonTo popup can be opened from any hostname, but it only allows cross-chain transfers under $5. Note that dev mode also runs on mainnet.
+In dev mode, meson.to popup can be opened from any hostname, but it only allows cross-chain transfers under $5. Note that dev mode also runs on mainnet.
 
-After the app is launched, please switch to release mode. In release mode, MesonTo can only be opened from your app URL.
+After the app is launched, please switch to release mode. In release mode, meson.to can only be opened from your app URL.

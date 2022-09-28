@@ -57,6 +57,6 @@ MesonToButton.propTypes = {
 }
 
 MesonToButton.defaultProps = {
-  appId: 'example',
+  appId: 'demo',
   onCompleted: () => {}
 }
