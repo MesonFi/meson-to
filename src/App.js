@@ -15,7 +15,7 @@ export default function App() {
       <span className='font-medium'>{data.received / 1e6} {data.to.token} on {data.to.chain}</span>
       <span className='mx-1.5 text-gray-300'>{'>'}</span>
       <img className='h-4 mr-1' src='/icon192.png' alt='' />
-      <span className='font-medium'>Example Web3 App</span>
+      <span className='font-medium'>Demo App</span>
     </a>
   )
 
@@ -24,7 +24,7 @@ export default function App() {
       <header className='flex flex-row items-center w-full px-4 sm:px-6 py-2'>
         <img className='h-8 mr-2' src='/icon192.png' alt='' />
         <div>
-          <div className='text-lg'>Example Web3 App</div>
+          <div className='text-lg'>Demo Web3 App</div>
           <div className='text-xs font-light text-gray'>
             A demo to demonstrate cross-chain deposit with meson
           </div>
@@ -58,7 +58,7 @@ export default function App() {
             This example contract will forward receiving tokens to the sender's address on Polygon.
           </div>
           <div>
-            <MesonToButton appId='example' onCompleted={setData} className='mt-4 lg:mt-6'>
+            <MesonToButton appId='demo' onCompleted={setData} className='mt-4 lg:mt-6'>
               <ButtonText />
             </MesonToButton>
           </div>

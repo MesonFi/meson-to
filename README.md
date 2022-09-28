@@ -1,1 +1,1 @@
-# An example app using MesonTo
+# A demo app using meson.to
