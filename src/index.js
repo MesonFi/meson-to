@@ -130,15 +130,13 @@ class MesonTo {
           }, 400)
           self._promise = null
 
+          dispose()
           resolve()
         }
       }
 
       doc.body.appendChild(modal)
-      modal.onclick = () => {
-        dispose()
-        closer.close()
-      }
+      modal.onclick = () => closer.close()
 
       const { dispose } = addMessageListener(this.window, iframe.contentWindow, this.mesonToHost, closer)
 
