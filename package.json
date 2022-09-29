@@ -3,7 +3,7 @@
   "version": "0.1.3",
   "private": true,
   "dependencies": {
-    "@mesonfi/to": "^0.1.3-rc.4",
+    "@mesonfi/to": "^0.1.3-rc.5",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",
