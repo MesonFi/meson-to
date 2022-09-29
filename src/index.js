@@ -33,8 +33,7 @@ class MesonTo {
     }
 
     const popup = this.window.open(`${this.mesonToHost}/${appId}`, 'meson.to', 'width=360,height=640')
-    const onClose = () => popup.close()
-    const { dispose } = addMessageListener(this.window, popup, this.mesonToHost, onClose)
+    const { dispose } = addMessageListener(this.window, popup, this.mesonToHost)
 
     this._promise = new Promise(resolve => {
       const h = setInterval(() => {
@@ -56,68 +55,95 @@ class MesonTo {
       return this._promise
     }
 
+    const doc = this.window.document
+    const lgScreen = this.window.innerWidth > 440
+
+    const modal = doc.createElement('div')
+    modal.style = 'position:fixed;inset:0;z-index:99999;overflow:hidden;display:flex;flex-direction:column;'
+    modal.style['justify-content'] = lgScreen ? 'center' : 'end'
+
+    const backdrop = doc.createElement('div')
+    backdrop.style = 'position:fixed;inset:0;transition:background 0.4s;'
+
+    const popup = doc.createElement('div')
+    popup.style = 'z-index:20;max-height:100%;display:flex;flex-direction:column;align-items:center;'
+    if (lgScreen) {
+      popup.style.padding = '24px 0'
+      popup.style['overflow-y'] = 'auto'
+    }
+
+    const container = doc.createElement('div')
+    container.style='position:relative;width:100%;max-width:440px;flex-shrink:0;background:#ecf5f0;overflow:hidden;box-shadow:0 0px 24px 0px rgb(0 0 0 / 40%)'
+    if (lgScreen) {
+      container.style['border-radius'] = '20px'
+      container.style.opacity = '0'
+      container.style.transition = 'opacity 0.25s'
+      const close = doc.createElement('div')
+      close.style = 'position:absolute;top:12px;right:16px;height:24px;font-size:28px;line-height:24px;cursor:pointer;color:#0004;'
+      close.onmouseover = () => { close.style.color = '#000a' }
+      close.onmouseout = () => { close.style.color = '#0004' }
+      close.innerHTML = '×'
+      container.appendChild(close)
+    } else {
+      container.style['border-radius'] = '20px 20px 0 0'
+      container.style.transform = 'translateY(600px)'
+      container.style.transition = 'transform 0.4s'
+      container.innerHTML = `<div style='position:absolute;top:8px;left:0;width:100%;display:flex;flex-direction:column;align-items:center'><div style='background:#444;height:4px;width:60px;border-radius:2px;overflow:hidden;'></div></div>`
+    }
+
+    const iframe = doc.createElement('iframe')
+    iframe.style = `width:100%;max-height:600px;overflow:hidden;`
+    iframe.src = `${this.mesonToHost}/${appId}`
+    if (lgScreen) {
+      iframe.style.height = 'calc(100vh - 48px)'
+      iframe.style['min-height'] = '520px'
+      iframe.style['margin-top'] = '-8px'
+    } else {
+      iframe.style.height = 'calc(100vh - 80px)'
+    }
+
+    modal.appendChild(backdrop)
+    modal.appendChild(popup)
+    popup.appendChild(container)
+    container.appendChild(iframe)
+
+    const self = this
     this._promise = new Promise(resolve => {
-      const doc = this.window.document
-      const lgScreen = this.window.innerWidth > 440
+      const closer = {
+        blocked: false,
+        block(blocked = true) {
+          this.blocked = blocked
+        },
+        close() {
+          if (this.blocked) {
+            iframe.contentWindow.postMessage({ source: 'app', data: { closeBlocked: true } }, self.mesonToHost)
+            return
+          }
+          backdrop.style.background = 'transparent'
+          if (lgScreen) {
+            container.style.opacity = '0'
+          } else {
+            container.style.transform = 'translateY(600px)'
+          }
+          setTimeout(() => {
+            doc.body.removeChild(modal)
+          }, 400)
+          self._promise = null
 
-      const modal = doc.createElement('div')
-      modal.style = 'position:relative;z-index:99999;'
-      
-      const backdrop = doc.createElement('div')
-      backdrop.style = 'position:fixed;inset:0;transition:background 0.4s;'
-
-      const popup = doc.createElement('div')
-      popup.style = 'z-index:20;position:fixed;inset:0;overflow-y:auto;display:flex;flex-direction:column;align-items:center;overflow:hidden;'
-      if (lgScreen) {
-        popup.style['justify-content'] = 'center'
-      } else {
-        popup.style['justify-content'] = 'end'
-      }
-
-      const container = doc.createElement('div')
-      container.style='width:100%;max-width:440px;flex-shrink:0;background:#ecf5f0;overflow:hidden;box-shadow:0 0px 24px 0px rgb(0 0 0 / 40%)'
-      if (lgScreen) {
-        container.style['border-radius'] = '20px'
-        container.style.opacity = '0'
-        container.style.transition = 'opacity 0.25s'
-      } else {
-        container.style['border-radius'] = '20px 20px 0 0'
-        container.style.transform = 'translateY(620px)'
-        container.style.transition = 'transform 0.4s'
-        container.innerHTML = `<div style='height:20px;display:flex;align-items:center;justify-content:center'><div style='background:black;height:4px;width:60px;border-radius:2px;overflow:hidden'></div></div>`
-      }
-
-      const iframe = doc.createElement('iframe')
-      iframe.style = `width:100%;max-height:592px;height:calc(100vh - 120px);overflow:hidden;`
-      iframe.src = `${this.mesonToHost}/${appId}`
-
-      modal.appendChild(backdrop)
-      modal.appendChild(popup)
-      popup.appendChild(container)
-      container.appendChild(iframe)
-
-      const onClose = () => {
-        backdrop.style.background = 'transparent'
-        if (lgScreen) {
-          container.style.opacity = '0'
-        } else {
-          container.style.transform = 'translateY(620px)'
+          resolve()
         }
-        setTimeout(() => {
-          doc.body.removeChild(modal)
-        }, 400)
-        this._promise = null
-
-        resolve()
       }
 
-      modal.onclick = onClose
       doc.body.appendChild(modal)
+      modal.onclick = () => {
+        dispose()
+        closer.close()
+      }
 
-      addMessageListener(this.window, iframe.contentWindow, this.mesonToHost, onClose)
+      const { dispose } = addMessageListener(this.window, iframe.contentWindow, this.mesonToHost, closer)
 
       setTimeout(() => {
-        backdrop.style.background = '#00000060'
+        backdrop.style.background = '#0006'
         if (lgScreen) {
           container.style.opacity = '1'
         } else {

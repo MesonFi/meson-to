@@ -1,4 +1,4 @@
-module.exports = function addMessageListener (window, target, targetOrigin, onClose) {
+module.exports = function addMessageListener (window, target, targetOrigin, closer) {
   const listener = evt => {
     if (evt.data.target === 'metamask-inpage') {
       const { data } = evt.data.data
@@ -16,12 +16,7 @@ module.exports = function addMessageListener (window, target, targetOrigin, onCl
       return
     }
 
-    if (data.close) {
-      dispose()
-      onClose()
-    } else if (data.copy) {
-      window.navigator.clipboard.writeText(data.copy)
-    } else if (data.jsonrpc === '2.0') {
+    if (data.jsonrpc === '2.0') {
       if (data.method === 'get-origin') {
         target.postMessage({
           source: 'app',
@@ -53,6 +48,19 @@ module.exports = function addMessageListener (window, target, targetOrigin, onCl
             data: { jsonrpc: '2.0', id: data.id, error }
           }, targetOrigin)
         })
+      return
+    }
+
+    if (data.copy) {
+      window.navigator.clipboard.writeText(data.copy)
+    } else if (closer) {
+      if (data.close) {
+        dispose()
+        closer.block(false)
+        closer.close()
+      } else if (typeof data.blockClose === 'boolean') {
+        closer.block(data.blockClose)
+      }
     }
   }
 
