@@ -28,7 +28,18 @@ module.exports = function addMessageListener (window, target, targetOrigin, onCl
           data: { jsonrpc: '2.0', id: data.id, result: window.origin }
         }, targetOrigin)
         return
+      } else if (data.method === 'get-ethereum') {
+        const result = Object.fromEntries(Object.keys(ethereum)
+          .filter(key => !['function', 'object'].includes(typeof ethereum[key]))
+          .map(key => [key, ethereum[key]])
+        )
+        target.postMessage({
+          source: 'app',
+          data: { jsonrpc: '2.0', id: data.id, result }
+        }, targetOrigin)
+        return
       }
+
       window.ethereum.request({ method: data.method, params: data.params })
         .then(result => {
           target.postMessage({
