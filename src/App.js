@@ -56,7 +56,7 @@ export default function App() {
             This example contract will forward receiving tokens to the sender's address on Polygon.
           </div>
           <div>
-            <MesonToButton appId='demo' onCompleted={setData} className='mt-4 lg:mt-6'>
+            <MesonToButton appId='demo' type='popup' onCompleted={setData} className='mt-4 lg:mt-6'>
               <ButtonText />
             </MesonToButton>
           </div>
