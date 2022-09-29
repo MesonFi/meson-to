@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react'
-import ReactGA from 'react-ga4'
+import React from 'react'
 import { MesonToButton } from '@mesonfi/to/react'
 
 import { ReactComponent as MesonIcon } from './meson.svg'
@@ -7,13 +6,6 @@ import popup from './popup.jpg'
 
 export default function App() {
   const [data, setData] = React.useState(null)
-  useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') {
-      ReactGA.initialize(process.env.REACT_APP_GA_ID)
-      ReactGA.event('launch')
-      ReactGA.send('pageview')
-    }
-  }, [])
   const completed = data && (
     <a className='flex items-center hover:underline' href={`https://explorer.meson.fi/swap/${data.swapId}`} target='_blank' rel="noreferrer">
       <span className='font-medium'>{data.amount / 1e6} {data.from.token} on {data.from.chain}</span>
