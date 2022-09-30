@@ -17,21 +17,33 @@ module.exports = function addMessageListener (window, target, targetOrigin, clos
     }
 
     if (data.jsonrpc === '2.0') {
-      if (data.method === 'get-origin') {
-        target.postMessage({
-          source: 'app',
-          data: { jsonrpc: '2.0', id: data.id, result: window.origin }
-        }, targetOrigin)
-        return
-      } else if (data.method === 'get-ethereum') {
-        const result = Object.fromEntries(Object.keys(ethereum)
-          .filter(key => !['function', 'object'].includes(typeof ethereum[key]))
-          .map(key => [key, ethereum[key]])
-        )
+      if (data.method === 'get_global') {
+        const value = window[data.params[0]]
+        let result
+        if (['string', 'number'].includes(typeof value)) {
+          result = value
+        } else if (typeof value === 'object') {
+          result = cloneObject(value)
+        }
         target.postMessage({
           source: 'app',
           data: { jsonrpc: '2.0', id: data.id, result }
         }, targetOrigin)
+        return
+      } else if (data.method === 'trx_sign') {
+        tronWeb.trx.sign(...data.params)
+          .then(result => {
+            target.postMessage({
+              source: 'app',
+              data: { jsonrpc: '2.0', id: data.id, result }
+            }, targetOrigin)
+          })
+          .catch(error => {
+            target.postMessage({
+              source: 'app',
+              data: { jsonrpc: '2.0', id: data.id, error }
+            }, targetOrigin)
+          })
         return
       }
 
@@ -68,4 +80,17 @@ module.exports = function addMessageListener (window, target, targetOrigin, clos
   const dispose = () => window.removeEventListener('message', listener)
 
   return { dispose }
+}
+
+function cloneObject(obj, level = 3) {
+  if (!level) {
+    return
+  }
+  return Object.fromEntries(Object.keys(obj)
+    .filter(key => !key.startsWith('_') && typeof obj[key] !== 'function')
+    .map(key => [
+      key,
+      typeof obj[key] === 'object' ? cloneObject(obj[key], level - 1) : obj[key]
+    ])
+  )
 }
