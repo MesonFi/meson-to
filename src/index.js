@@ -108,7 +108,7 @@ class MesonTo {
     }
 
     const iframe = doc.createElement('iframe')
-    iframe.style = `z-index:50;width:100%;max-height:506px;overflow:hidden;border:none;transition:max-height 0.2s;`
+    iframe.style = `z-index:50;width:100%;max-height:518px;overflow:hidden;border:none;transition:max-height 0.2s;`
     iframe.src = `${this.mesonToHost}/${appId}`
     if (lgScreen) {
       iframe.style.height = 'calc(100vh - 48px)'
