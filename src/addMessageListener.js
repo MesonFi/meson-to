@@ -1,4 +1,4 @@
-module.exports = function addMessageListener (window, target, targetOrigin, closer) {
+module.exports = function addMessageListener (window, target, targetOrigin, onHeight, closer) {
   const listener = evt => {
     if (evt.data.target === 'metamask-inpage') {
       const { data } = evt.data.data
@@ -65,6 +65,8 @@ module.exports = function addMessageListener (window, target, targetOrigin, clos
 
     if (data.copy) {
       window.navigator.clipboard.writeText(data.copy)
+    } else if (data.height && onHeight) {
+      onHeight(data.height)
     } else if (closer) {
       if (data.close) {
         dispose()

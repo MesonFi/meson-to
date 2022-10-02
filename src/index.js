@@ -108,11 +108,10 @@ class MesonTo {
     }
 
     const iframe = doc.createElement('iframe')
-    iframe.style = `z-index:50;width:100%;max-height:600px;overflow:hidden;border:none;`
+    iframe.style = `z-index:50;width:100%;max-height:506px;overflow:hidden;border:none;transition:max-height 0.2s;`
     iframe.src = `${this.mesonToHost}/${appId}`
     if (lgScreen) {
       iframe.style.height = 'calc(100vh - 48px)'
-      iframe.style['min-height'] = '520px'
       iframe.style['margin-top'] = '-8px'
     } else {
       iframe.style.height = 'calc(100vh - 80px)'
@@ -123,6 +122,9 @@ class MesonTo {
           iframe.style.transform = ''
         }, 100)
       }
+    }
+    const onHeight = height => {
+      iframe.style['max-height'] = height + 'px'
     }
 
     modal.appendChild(backdrop)
@@ -202,7 +204,7 @@ class MesonTo {
       doc.body.appendChild(modal)
       modal.onclick = () => closer.close()
 
-      const { dispose } = addMessageListener(this.window, iframe.contentWindow, this.mesonToHost, closer)
+      const { dispose } = addMessageListener(this.window, iframe.contentWindow, this.mesonToHost, onHeight, closer)
 
       setTimeout(() => {
         backdrop.style.background = '#0006'
