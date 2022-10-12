@@ -9,3 +9,5 @@ yarn-error.log*
 .yarn-integrity
 
 node_modules/
+
+lib
