@@ -1,6 +1,6 @@
 {
   "name": "@mesonfi/to",
-  "version": "0.1.4-rc.1",
+  "version": "0.1.5-rc.2",
   "license": "MIT",
   "main": "lib/index.js",
   "files": [
@@ -10,7 +10,8 @@
   "scripts": {
     "start": "rollup -c -w",
     "build": "rollup -c",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "prepare": "yarn build"
   },
   "devDependencies": {
     "@babel/core": "^7.19.0",
