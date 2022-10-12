@@ -15,7 +15,7 @@ Get a feel for how meson.to works with this [demo](https://demo.meson.to).
 Add the npm package `@mesonfi/to` to your frontend project through `npm i -S @mesonfi/to` or `yarn add @mesonfi/to`. Then integrate it to your frontend project 
 
 ```js
-import { MesonToButton } from '@mesonfi/to/react'
+import MesonToButton from '@mesonfi/to'
 
 export default function App () {
   const onCompleted = data => {
@@ -54,7 +54,7 @@ See a complete example in `examples/demo`
 You can also add meson.to directly to the html file
 
 ```html
-<script src="https://raw.githubusercontent.com/MesonFi/meson-to/main/lib/meson-to.js"></script>
+<script src="https://raw.githubusercontent.com/MesonFi/meson-to/main/dist/meson-to.js"></script>
 ```
 
 Once the script is loaded, you will be able to use `MesonTo` globally. If you use a package manager for your frontend project, you can also import it through
