@@ -11,20 +11,29 @@ export default class MesonTo {
     this._promise = null
   }
 
-  async open (appId, type) {
+  async open (appId, type, to = {}) {
     if (!type) {
       type = isMobile(this.window) ? 'iframe' : 'popup'
     }
+
+    let url = `${this.mesonToHost}/${appId}`
+    if (to.address) {
+      url = `${url}/${to.address}`
+    }
+    if (to.chain || to.tokens) {
+      url = `${url}?c=${to.chain || ''}&t=${to.tokens?.join(',').toLowerCase() || ''}`
+    }
+
     if (type === 'iframe') {
-      return this._openIframe(appId)
+      return this._openIframe(url)
     } else if (type === 'popup') {
-      return this._openPopup(appId)
+      return this._openPopup(url)
     } else {
       throw new Error(`Unknown open type: ${type}`)
     }
   }
 
-  _openPopup (appId) {
+  _openPopup (url) {
     if (this._promise) {
       if (this._promise.focus) {
         this._promise.focus()
@@ -32,7 +41,7 @@ export default class MesonTo {
       return this._promise
     }
 
-    const popup = this.window.open(`${this.mesonToHost}/${appId}`, 'meson.to', 'width=360,height=640')
+    const popup = this.window.open(url, 'meson.to', 'width=360,height=640')
     const { dispose } = addMessageListener(this.window, popup, this.mesonToHost)
 
     this._promise = new Promise(resolve => {
@@ -50,7 +59,7 @@ export default class MesonTo {
     return this._promise
   }
 
-  _openIframe (appId) {
+  _openIframe (url) {
     if (this._promise) {
       return this._promise
     }
@@ -109,7 +118,7 @@ export default class MesonTo {
 
     const iframe = doc.createElement('iframe')
     iframe.style = 'z-index:50;width:100%;max-height:518px;overflow:hidden;border:none;transition:max-height 0.2s;'
-    iframe.src = `${this.mesonToHost}/${appId}`
+    iframe.src = url
     if (lgScreen) {
       iframe.style.height = 'calc(100vh - 48px)'
       iframe.style['margin-top'] = '-8px'

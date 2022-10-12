@@ -6,7 +6,7 @@ import MesonTo from '../MesonTo'
 import styles from './meson2.module.css'
 import Spinner from './spinner.svg'
 
-export default function MesonToButton ({ appId, isTestnet, type, onCompleted, className, children }) {
+export default function MesonToButton ({ appId, to, isTestnet, type, onCompleted, className, children }) {
   const [meson2, setMeson2] = React.useState()
   const [pending, setPending] = React.useState(false)
 
@@ -16,13 +16,13 @@ export default function MesonToButton ({ appId, isTestnet, type, onCompleted, cl
 
   const onClick = React.useCallback(() => {
     setPending(true)
-    meson2?.open(appId, type)
+    meson2?.open(appId, type, to)
       .then(() => setPending(false))
       .catch(err => {
         console.warn(err)
         setPending(false)
       })
-  }, [meson2, appId, type])
+  }, [meson2, appId, type, to])
 
   React.useEffect(() => {
     if (meson2) {
@@ -57,6 +57,11 @@ export default function MesonToButton ({ appId, isTestnet, type, onCompleted, cl
 
 MesonToButton.propTypes = {
   appId: PropTypes.string.isRequired,
+  to: PropTypes.objectOf({
+    addr: PropTypes.string,
+    chain: PropTypes.oneOf(['arb', 'aurora', 'avax', 'bnb', 'cfx', 'eth', 'ftm', 'movr', 'opt', 'polygon', 'tron']),
+    tokens: PropTypes.arrayOf(PropTypes.string)
+  }),
   isTestnet: PropTypes.bool,
   type: PropTypes.string,
   onCompleted: PropTypes.func.isRequired,

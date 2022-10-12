@@ -2,7 +2,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
   padding: 12px 24px;
   border-radius: 12px;
   background: linear-gradient(to right, #06c17e, #06c1a8);
