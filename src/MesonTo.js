@@ -1,7 +1,7 @@
-const addMessageListener = require('./addMessageListener')
-const isMobile = require('./isMobile')
+import addMessageListener from './addMessageListener'
+import isMobile from './isMobile'
 
-class MesonTo {
+export default class MesonTo {
   constructor (window, isTestnet = false) {
     Object.defineProperty(this, 'window', {
       value: window,
@@ -65,7 +65,7 @@ class MesonTo {
     const backdrop = doc.createElement('div')
     backdrop.style = 'position:fixed;inset:0;transition:background 0.4s;'
     backdrop.ontouchmove = evt => evt.preventDefault()
-      
+
     const container = doc.createElement('div')
     container.style = 'z-index:10;display:flex;flex-direction:column;align-items:center;'
     container.ontouchmove = evt => evt.preventDefault()
@@ -82,8 +82,8 @@ class MesonTo {
     }
 
     const content = doc.createElement('div')
-    content.style='position:relative;width:100%;max-width:440px;flex-shrink:0;background:#ecf5f0;overflow:hidden;box-shadow:0 0px 24px 0px rgb(0 0 0 / 40%)'
-    
+    content.style = 'position:relative;width:100%;max-width:440px;flex-shrink:0;background:#ecf5f0;overflow:hidden;box-shadow:0 0px 24px 0px rgb(0 0 0 / 40%)'
+
     let barWrapper
     if (lgScreen) {
       content.style['border-radius'] = '20px'
@@ -108,7 +108,7 @@ class MesonTo {
     }
 
     const iframe = doc.createElement('iframe')
-    iframe.style = `z-index:50;width:100%;max-height:518px;overflow:hidden;border:none;transition:max-height 0.2s;`
+    iframe.style = 'z-index:50;width:100%;max-height:518px;overflow:hidden;border:none;transition:max-height 0.2s;'
     iframe.src = `${this.mesonToHost}/${appId}`
     if (lgScreen) {
       iframe.style.height = 'calc(100vh - 48px)'
@@ -140,14 +140,14 @@ class MesonTo {
           evt.preventDefault()
           const initY = evt.touches[0].clientY
           container.style.transition = 'none'
-          
+
           const mask = doc.createElement('div')
           mask.style = 'position:absolute;inset:0;z-index:100;'
           mask.onclick = evt => evt.stopPropagation()
           barWrapper.ontouchend = evt => {
             if (delta < 100) {
               container.style.transition = 'transform 0.4s'
-              container.style.transform = `translateY(200px)`
+              container.style.transform = 'translateY(200px)'
             } else {
               container.style.transition = 'transform 0.2s'
               container.style['transition-timing-function'] = 'linear'
@@ -168,7 +168,7 @@ class MesonTo {
             if (delta < -100) {
               delta = -100
             }
-            container.style.transform = `translateY(${200+delta}px)`
+            container.style.transform = `translateY(${200 + delta}px)`
           }
           modal.appendChild(mask)
         }
@@ -176,13 +176,13 @@ class MesonTo {
 
       const closer = {
         blocked: false,
-        block(blocked = true) {
+        block (blocked = true) {
           this.blocked = blocked
         },
-        close() {
+        close () {
           if (this.blocked) {
             iframe.contentWindow.postMessage({ source: 'app', data: { closeBlocked: true } }, self.mesonToHost)
-            container.style.transform = `translateY(200px)`
+            container.style.transform = 'translateY(200px)'
             return
           }
           if (lgScreen) {
@@ -207,7 +207,7 @@ class MesonTo {
       const { dispose } = addMessageListener(this.window, iframe.contentWindow, this.mesonToHost, onHeight, closer)
 
       setTimeout(() => {
-        backdrop.style.background = '#0006'
+        backdrop.style.background = '#000b'
         if (lgScreen) {
           content.style.opacity = '1'
         } else {
@@ -241,5 +241,3 @@ class MesonTo {
     }
   }
 }
-
-module.exports = MesonTo

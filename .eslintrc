@@ -1,0 +1,15 @@
+{
+  "parser": "@babel/eslint-parser",
+  "extends": [
+    "standard",
+    "standard-jsx",
+    "standard-react"
+  ],
+  "env": {
+    "browser": true
+  },
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "ignorePatterns": ["dist/*.js", "lib/*.js"]
+}

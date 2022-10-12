@@ -1,4 +1,4 @@
-module.exports = function addMessageListener (window, target, targetOrigin, onHeight, closer) {
+export default function addMessageListener (window, target, targetOrigin, onHeight, closer) {
   const listener = evt => {
     if (evt.data.target === 'metamask-inpage') {
       const { data } = evt.data.data
@@ -31,7 +31,7 @@ module.exports = function addMessageListener (window, target, targetOrigin, onHe
         }, targetOrigin)
         return
       } else if (data.method === 'trx_sign') {
-        tronWeb.trx.sign(...data.params)
+        window.tronWeb?.trx.sign(...data.params)
           .then(result => {
             target.postMessage({
               source: 'app',
@@ -84,8 +84,8 @@ module.exports = function addMessageListener (window, target, targetOrigin, onHe
   return { dispose }
 }
 
-function cloneObject(obj, level = 3) {
-  if (!level) {
+function cloneObject (obj, level = 3) {
+  if (!obj || !level) {
     return
   }
   return Object.fromEntries(Object.keys(obj)
