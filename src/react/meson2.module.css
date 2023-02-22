@@ -1,3 +1,19 @@
+.meson2-container {
+  position: relative;
+  width: 100%;
+  height: fit-content;
+}
+.meson2-wrapper {
+  position: relative;
+  width: 100%;
+  height: fit-content;
+  min-height: 216px;
+}
+.meson2-absolute-full {
+  position: absolute;
+  inset: 0;
+}
+
 .button {
   display: flex;
   align-items: center;

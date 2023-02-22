@@ -7,13 +7,13 @@ import pkg from './package.json' assert { type: 'json' }
 
 export default [
   {
-    input: 'src/MesonToButton/index.js',
+    input: 'src/react/index.js',
     output: {
       file: 'lib/index.js',
       format: 'es'
     },
     external: [
-      "@mesonfi/to",
+      '@mesonfi/to',
       ...Object.keys(pkg.peerDependencies),
     ],
     plugins: [

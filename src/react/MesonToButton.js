@@ -16,7 +16,7 @@ export default function MesonToButton ({ appId, to, isTestnet, type, onCompleted
 
   const onClick = React.useCallback(() => {
     setPending(true)
-    meson2?.open(appId, type, to)
+    meson2?.open(to ? { ...to, appId } : appId, type)
       .then(() => setPending(false))
       .catch(err => {
         console.warn(err)
@@ -57,9 +57,10 @@ export default function MesonToButton ({ appId, to, isTestnet, type, onCompleted
 
 MesonToButton.propTypes = {
   appId: PropTypes.string.isRequired,
-  to: PropTypes.objectOf({
+  to: PropTypes.shape({
+    appId: PropTypes.string,
     addr: PropTypes.string,
-    chain: PropTypes.oneOf(['arb', 'aurora', 'avax', 'bnb', 'cfx', 'eth', 'ftm', 'movr', 'opt', 'polygon', 'tron']),
+    chain: PropTypes.oneOf(['arb', 'aurora', 'avax', 'beam', 'bnb', 'cfx', 'eth', 'ftm', 'movr', 'opt', 'polygon', 'tron']),
     tokens: PropTypes.arrayOf(PropTypes.string)
   }),
   isTestnet: PropTypes.bool,
