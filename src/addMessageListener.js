@@ -1,11 +1,15 @@
 export default function addMessageListener (window, target, targetOrigin, onHeight, closer) {
-  const listener = evt => {
+  const onmessage = evt => {
     if (evt.data.target === 'metamask-inpage') {
       const { data } = evt.data.data
       if (['metamask_chainChanged', 'metamask_accountsChanged'].includes(data.method)) {
         target.postMessage({ source: 'app', data }, targetOrigin)
       }
       return
+    } else if (evt.data.isTronLink) {
+      target.postMessage({ source: 'app', data: evt.data }, targetOrigin)
+    } else if (evt.data.to === 'meson2') {
+      target.postMessage({ source: 'app', data: evt.data }, targetOrigin)
     }
 
     if (evt.origin !== targetOrigin) {
@@ -47,8 +51,12 @@ export default function addMessageListener (window, target, targetOrigin, onHeig
         return
       }
 
-      window.ethereum.request({ method: data.method, params: data.params })
+      const rpcClient = data.method.startsWith('tron_') ? window.tronLink : window.ethereum
+      rpcClient.request({ method: data.method, params: data.params })
         .then(result => {
+          if (data.method === 'tron_requestAccounts') {
+            result.defaultAddress = window.tronWeb.defaultAddress
+          }
           target.postMessage({
             source: 'app',
             data: { jsonrpc: '2.0', id: data.id, result }
@@ -60,6 +68,13 @@ export default function addMessageListener (window, target, targetOrigin, onHeig
             data: { jsonrpc: '2.0', id: data.id, error }
           }, targetOrigin)
         })
+      return
+    }
+
+    if (data.initiator === 'meson2') {
+      const evt = new Event('meson2')
+      evt.data = { type: data.type, data: data.data }
+      window.dispatchEvent(evt)
       return
     }
 
@@ -78,8 +93,19 @@ export default function addMessageListener (window, target, targetOrigin, onHeig
     }
   }
 
-  window.addEventListener('message', listener)
-  const dispose = () => window.removeEventListener('message', listener)
+  const onclick = () => {
+    target.postMessage({
+      source: 'app',
+      data: { event: 'onclick-page' }
+    }, targetOrigin)
+  }
+
+  window.addEventListener('message', onmessage)
+  window.addEventListener('click', onclick)
+  const dispose = () => {
+    window.removeEventListener('message', onmessage)
+    window.removeEventListener('click', onclick)
+  }
 
   return { dispose }
 }

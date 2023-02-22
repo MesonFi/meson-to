@@ -11,25 +11,33 @@ export default class MesonTo {
     this._promise = null
   }
 
-  async open (appId, type, to = {}) {
-    if (!type) {
-      type = isMobile(this.window) ? 'iframe' : 'popup'
+  async open (appIdOrTo, target) {
+    if (!target) {
+      target = isMobile(this.window) ? 'iframe' : 'popup'
     }
 
-    let url = `${this.mesonToHost}/${appId}`
-    if (to.address) {
-      url = `${url}/${to.address}`
-    }
-    if (to.chain || to.tokens) {
-      url = `${url}?c=${to.chain || ''}&t=${to.tokens?.join(',').toLowerCase() || ''}`
-    }
-
-    if (type === 'iframe') {
-      return this._openIframe(url)
-    } else if (type === 'popup') {
-      return this._openPopup(url)
+    let url
+    if (typeof appIdOrTo === 'string') {
+      url = `${this.mesonToHost}/${appIdOrTo}`
     } else {
-      throw new Error(`Unknown open type: ${type}`)
+      const { appId, addr, chain, tokens } = appIdOrTo
+      url = `${this.mesonToHost}/${appId}`
+      if (addr) {
+        url = `${url}/${addr}`
+      }
+      if (chain || tokens) {
+        url = `${url}?c=${chain || ''}&t=${tokens?.join(',').toLowerCase() || ''}`
+      }
+    }
+
+    if (target === 'iframe') {
+      return this._openIframe(url)
+    } else if (target === 'popup') {
+      return this._openPopup(url)
+    } else if (target) {
+      return this._openIframe(url, target, true)
+    } else {
+      throw new Error(`Unknown open target: ${target}`)
     }
   }
 
@@ -59,16 +67,19 @@ export default class MesonTo {
     return this._promise
   }
 
-  _openIframe (url) {
+  _openIframe (url, parent = this.window.document.body, embedded = false) {
     if (this._promise) {
       return this._promise
     }
 
     const doc = this.window.document
-    const lgScreen = this.window.innerWidth > 440
+    const lgScreen = embedded || (this.window.innerWidth > 440)
 
     const modal = doc.createElement('div')
-    modal.style = 'position:fixed;inset:0;z-index:99999;overflow:hidden;display:flex;flex-direction:column;'
+    modal.style = 'inset:0;z-index:99999;overflow:hidden;display:flex;flex-direction:column;'
+    if (!embedded) {
+      modal.style += 'position:fixed;'
+    }
     modal.style['justify-content'] = lgScreen ? 'center' : 'end'
 
     const backdrop = doc.createElement('div')
@@ -80,7 +91,9 @@ export default class MesonTo {
     container.ontouchmove = evt => evt.preventDefault()
 
     if (lgScreen) {
-      container.style.padding = '24px 0'
+      if (!embedded) {
+        container.style.padding = '24px 0'
+      }
       container.style['max-height'] = '100%'
       container.style['overflow-y'] = 'auto'
     } else {
@@ -91,19 +104,24 @@ export default class MesonTo {
     }
 
     const content = doc.createElement('div')
-    content.style = 'position:relative;width:100%;max-width:440px;flex-shrink:0;background:#ecf5f0;overflow:hidden;box-shadow:0 0px 24px 0px rgb(0 0 0 / 40%)'
+    content.style = 'position:relative;width:100%;max-width:440px;flex-shrink:0;'
+    if (!embedded) {
+      content.style += 'background:#ecf5f0;overflow:hidden;box-shadow:0 0px 24px 0px rgb(0 0 0 / 40%);'
+    }
 
     let barWrapper
     if (lgScreen) {
       content.style['border-radius'] = '20px'
       content.style.opacity = '0'
       content.style.transition = 'opacity 0.25s'
-      const close = doc.createElement('div')
-      close.style = 'position:absolute;top:12px;right:16px;height:24px;font-size:28px;line-height:24px;cursor:pointer;color:#0004;'
-      close.onmouseover = () => { close.style.color = '#000a' }
-      close.onmouseout = () => { close.style.color = '#0004' }
-      close.innerHTML = '×'
-      content.appendChild(close)
+      if (!embedded) {
+        const close = doc.createElement('div')
+        close.style = 'position:absolute;top:12px;right:16px;height:24px;font-size:28px;line-height:24px;cursor:pointer;color:#0004;'
+        close.onmouseover = () => { close.style.color = '#000a' }
+        close.onmouseout = () => { close.style.color = '#0004' }
+        close.innerHTML = '×'
+        content.appendChild(close)
+      }
     } else {
       content.style['border-radius'] = '20px 20px 0 0'
       content.style['padding-bottom'] = '200px'
@@ -116,29 +134,48 @@ export default class MesonTo {
       barWrapper.appendChild(bar)
     }
 
+    const loading = doc.createElement('div')
+    loading.style = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;'
+    loading.innerHTML = 'Loading...'
+
     const iframe = doc.createElement('iframe')
     iframe.style = 'z-index:50;width:100%;max-height:518px;overflow:hidden;border:none;transition:max-height 0.2s;'
+    if (embedded) {
+      iframe.style['max-height'] = '216px'
+    }
     iframe.src = url
     if (lgScreen) {
       iframe.style.height = 'calc(100vh - 48px)'
-      iframe.style['margin-top'] = '-8px'
+      if (!embedded) {
+        iframe.style['margin-top'] = '-8px'
+      }
     } else {
-      iframe.style.height = 'calc(100vh - 80px)'
+      if (!embedded) {
+        iframe.style.height = 'calc(100vh - 80px)'
+      }
       iframe.style.transform = 'translateY(1000px)'
-      iframe.onload = () => {
-        iframe.onload = undefined
+    }
+
+    iframe.onload = () => {
+      content.removeChild(loading)
+      iframe.onload = undefined
+      if (!lgScreen) {
         setTimeout(() => {
           iframe.style.transform = ''
         }, 100)
       }
     }
+
     const onHeight = height => {
       iframe.style['max-height'] = height + 'px'
     }
 
-    modal.appendChild(backdrop)
+    if (!embedded) {
+      modal.appendChild(backdrop)
+    }
     modal.appendChild(container)
     container.appendChild(content)
+    content.appendChild(loading)
     content.appendChild(iframe)
 
     const self = this
@@ -190,7 +227,7 @@ export default class MesonTo {
         },
         close () {
           if (this.blocked) {
-            iframe.contentWindow.postMessage({ source: 'app', data: { closeBlocked: true } }, self.mesonToHost)
+            iframe.contentWindow.postMessage({ source: 'app', data: { event: 'close-blocked' } }, self.mesonToHost)
             container.style.transform = 'translateY(200px)'
             return
           }
@@ -201,7 +238,7 @@ export default class MesonTo {
           }
           backdrop.style.background = 'transparent'
           setTimeout(() => {
-            doc.body.removeChild(modal)
+            parent.removeChild(modal)
           }, 400)
           self._promise = null
 
@@ -210,8 +247,10 @@ export default class MesonTo {
         }
       }
 
-      doc.body.appendChild(modal)
-      modal.onclick = () => closer.close()
+      parent.appendChild(modal)
+      if (!embedded) {
+        modal.onclick = () => closer.close()
+      }
 
       const { dispose } = addMessageListener(this.window, iframe.contentWindow, this.mesonToHost, onHeight, closer)
 
