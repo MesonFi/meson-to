@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { SUPPORTED_CHAINS } from '../constants'
 import MesonTo from '../MesonTo'
 import styles from './meson2.module.css'
 
@@ -73,7 +74,7 @@ MesonToEmbedded.propTypes = {
   to: PropTypes.shape({
     appId: PropTypes.string,
     addr: PropTypes.string,
-    chain: PropTypes.oneOf(['arb', 'aurora', 'avax', 'beam', 'bnb', 'cfx', 'eth', 'ftm', 'movr', 'opt', 'polygon', 'tron']),
+    chain: PropTypes.oneOf(SUPPORTED_CHAINS),
     tokens: PropTypes.arrayOf(PropTypes.string)
   }),
   isTestnet: PropTypes.bool,
