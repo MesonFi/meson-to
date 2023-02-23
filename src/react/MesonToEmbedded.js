@@ -2,17 +2,21 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import { SUPPORTED_CHAINS } from '../constants'
-import MesonTo from '../MesonTo'
+import useMesonTo from './useMesonTo'
 import styles from './meson2.module.css'
 
-export default function MesonToEmbedded ({ appId, to, isTestnet, onCompleted, SuccessInfo }) {
+export default function MesonToEmbedded ({ appId, to, host, onCompleted, SuccessInfo }) {
   const ref = React.useRef()
   const [shouldOpen, setShouldOpen] = React.useState(true)
   const [data, setData] = React.useState()
 
-  const meson2 = React.useMemo(() => {
-    return new MesonTo(window, isTestnet)
-  }, [])
+  const _onCompleted = React.useCallback(data => {
+    setShouldOpen(false)
+    setData(data)
+    onCompleted(data)
+  }, [onCompleted])
+
+  const meson2 = useMesonTo(window, host, _onCompleted)
 
   React.useEffect(() => {
     if (!ref.current || !shouldOpen) {
@@ -25,19 +29,6 @@ export default function MesonToEmbedded ({ appId, to, isTestnet, onCompleted, Su
         console.warn(err)
       })
   }, [ref.current, shouldOpen, appId, to])
-
-  const _onCompleted = React.useCallback(data => {
-    setShouldOpen(false)
-    setData(data)
-    onCompleted(data)
-  }, [onCompleted])
-
-  React.useEffect(() => {
-    if (meson2) {
-      const disposable = meson2.onCompleted(_onCompleted)
-      return () => disposable.dispose()
-    }
-  }, [meson2, _onCompleted])
 
   const successInfo = React.useMemo(() => {
     if (!data) {
@@ -77,7 +68,7 @@ MesonToEmbedded.propTypes = {
     chain: PropTypes.oneOf(SUPPORTED_CHAINS),
     tokens: PropTypes.arrayOf(PropTypes.string)
   }),
-  isTestnet: PropTypes.bool,
+  host: PropTypes.string,
   onCompleted: PropTypes.func.isRequired,
   SuccessInfo: PropTypes.elementType
 }

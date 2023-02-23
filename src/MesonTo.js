@@ -2,12 +2,18 @@ import addMessageListener from './addMessageListener'
 import isMobile from './isMobile'
 
 export default class MesonTo {
-  constructor (window, isTestnet = false) {
+  constructor (window, opts = {}) {
     Object.defineProperty(this, 'window', {
       value: window,
       writable: false
     })
-    this.mesonToHost = isTestnet ? 'https://testnet.meson.to' : 'https://meson.to'
+    if (!opts.host) {
+      this.mesonToHost = 'https://meson.to'
+    } else if (opts.host === 'testnet') {
+      this.mesonToHost = 'https://testnet.meson.to'
+    } else {
+      this.mesonToHost = opts.host
+    }
     this._promise = null
   }
 
@@ -287,5 +293,9 @@ export default class MesonTo {
         this._callback = null
       }
     }
+  }
+
+  dispose () {
+    // TODO
   }
 }

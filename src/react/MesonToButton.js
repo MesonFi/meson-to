@@ -3,17 +3,14 @@ import classnames from 'classnames'
 import PropTypes from 'prop-types'
 
 import { SUPPORTED_CHAINS } from '../constants'
-import MesonTo from '../MesonTo'
+import useMesonTo from './useMesonTo'
 import styles from './meson2.module.css'
 import Spinner from './spinner.svg'
 
-export default function MesonToButton ({ appId, to, isTestnet, type, onCompleted, className, children }) {
-  const [meson2, setMeson2] = React.useState()
+export default function MesonToButton ({ appId, to, host, type, onCompleted, className, children }) {
   const [pending, setPending] = React.useState(false)
 
-  React.useEffect(() => {
-    setMeson2(new MesonTo(window, isTestnet))
-  }, [])
+  const meson2 = useMesonTo(window, host, onCompleted)
 
   const onClick = React.useCallback(() => {
     setPending(true)
@@ -24,13 +21,6 @@ export default function MesonToButton ({ appId, to, isTestnet, type, onCompleted
         setPending(false)
       })
   }, [meson2, appId, type, to])
-
-  React.useEffect(() => {
-    if (meson2) {
-      const disposable = meson2.onCompleted(onCompleted)
-      return () => disposable.dispose()
-    }
-  }, [meson2, onCompleted])
 
   let btnChildren
   if (typeof children === 'string') {
@@ -64,7 +54,7 @@ MesonToButton.propTypes = {
     chain: PropTypes.oneOf(SUPPORTED_CHAINS),
     tokens: PropTypes.arrayOf(PropTypes.string)
   }),
-  isTestnet: PropTypes.bool,
+  host: PropTypes.string,
   type: PropTypes.string,
   onCompleted: PropTypes.func.isRequired,
   className: PropTypes.string,
