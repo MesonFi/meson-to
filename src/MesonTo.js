@@ -8,13 +8,15 @@ export default class MesonTo {
       writable: false
     })
     if (!opts.host) {
-      this.mesonToHost = 'https://meson.to'
+      this.host = 'https://meson.to'
     } else if (opts.host === 'testnet') {
-      this.mesonToHost = 'https://testnet.meson.to'
+      this.host = 'https://testnet.meson.to'
     } else {
-      this.mesonToHost = opts.host
+      this.host = opts.host
     }
+    this._onCompleted = opts.onCompleted || null
     this._promise = null
+    this._mesonToWindow = null
   }
 
   async open (appIdOrTo, target) {
@@ -24,10 +26,10 @@ export default class MesonTo {
 
     let url
     if (typeof appIdOrTo === 'string') {
-      url = `${this.mesonToHost}/${appIdOrTo}`
+      url = `${this.host}/${appIdOrTo}`
     } else {
       const { appId, addr, chain, tokens } = appIdOrTo
-      url = `${this.mesonToHost}/${appId}`
+      url = `${this.host}/${appId}`
       if (addr) {
         url = `${url}/${addr}`
       }
@@ -47,6 +49,22 @@ export default class MesonTo {
     }
   }
 
+  __postMessageToMesonTo (payload) {
+    this._mesonToWindow?.postMessage({ source: 'app-with-meson.to', payload }, this.host)
+  }
+
+  __returnResult (id, result, error) {
+    if (error) {
+      this.__postMessageToMesonTo({ jsonrpc: '2.0', id, error })
+    } else {
+      this.__postMessageToMesonTo({ jsonrpc: '2.0', id, result })
+    }
+  }
+
+  __triggerEvent (event) {
+    this.__postMessageToMesonTo({ event })
+  }
+
   _openPopup (url) {
     if (this._promise) {
       if (this._promise.focus) {
@@ -56,7 +74,8 @@ export default class MesonTo {
     }
 
     const popup = this.window.open(url, 'meson.to', 'width=360,height=640')
-    const { dispose } = addMessageListener(this.window, popup, this.mesonToHost)
+    this._mesonToWindow = popup
+    const { dispose } = addMessageListener(this)
 
     this._promise = new Promise(resolve => {
       const h = setInterval(() => {
@@ -233,7 +252,7 @@ export default class MesonTo {
         },
         close () {
           if (this.blocked) {
-            iframe.contentWindow.postMessage({ source: 'app', data: { event: 'close-blocked' } }, self.mesonToHost)
+            self.__triggerEvent('close-blocked')
             container.style.transform = 'translateY(200px)'
             return
           }
@@ -258,7 +277,8 @@ export default class MesonTo {
         modal.onclick = () => closer.close()
       }
 
-      const { dispose } = addMessageListener(this.window, iframe.contentWindow, this.mesonToHost, onHeight, closer)
+      this._mesonToWindow = iframe.contentWindow
+      const { dispose } = addMessageListener(this, onHeight, closer)
 
       setTimeout(() => {
         backdrop.style.background = '#000b'
@@ -271,28 +291,6 @@ export default class MesonTo {
     })
 
     return this._promise
-  }
-
-  onCompleted (callback) {
-    if (this._callback) {
-      throw new Error('meson2.onCompleted listener already registered')
-    } else if (typeof callback !== 'function') {
-      throw new Error('callback is not a valid function')
-    }
-
-    this._callback = ({ data }) => {
-      if (data.source === 'meson.to' && data.data && data.data.swapId) {
-        callback(data.data)
-      }
-    }
-
-    this.window.addEventListener('message', this._callback)
-    return {
-      dispose: () => {
-        this.window.removeEventListener('message', this._callback)
-        this._callback = null
-      }
-    }
   }
 
   dispose () {

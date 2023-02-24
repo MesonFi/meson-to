@@ -1,104 +1,108 @@
-export default function addMessageListener (window, target, targetOrigin, onHeight, closer) {
-  const onmessage = evt => {
-    if (evt.data.target === 'metamask-inpage') {
-      const { data } = evt.data.data
-      if (['metamask_chainChanged', 'metamask_accountsChanged'].includes(data.method)) {
-        target.postMessage({ source: 'app', data }, targetOrigin)
+export default function addMessageListener (meson2, onHeight, closer) {
+  const { window } = meson2
+
+  const onmessage = ({ origin, data }) => {
+    if (data.target === 'metamask-inpage') {
+      const d = data.data.data
+      if (['metamask_chainChanged', 'metamask_accountsChanged'].includes(d.method)) {
+        meson2.__postMessageToMesonTo(d)
       }
       return
-    } else if (evt.data.isTronLink) {
-      target.postMessage({ source: 'app', data: evt.data }, targetOrigin)
-    } else if (evt.data.to === 'meson2') {
-      target.postMessage({ source: 'app', data: evt.data }, targetOrigin)
+    } else if (data.isTronLink) {
+      meson2.__postMessageToMesonTo(data)
+    } else if (data.to === 'meson.to') {
+      meson2.__triggerEvent(data.event)
     }
 
-    if (evt.origin !== targetOrigin) {
+    if (origin !== meson2.host) {
       return
     }
-    const { source, data } = evt.data
+    const { source, payload } = data
     if (source !== 'meson.to') {
       return
     }
 
-    if (data.jsonrpc === '2.0') {
-      if (data.method === 'get_global') {
-        const value = window[data.params[0]]
-        let result
-        if (['string', 'number'].includes(typeof value)) {
-          result = value
-        } else if (typeof value === 'object') {
-          result = cloneObject(value)
-        }
-        target.postMessage({
-          source: 'app',
-          data: { jsonrpc: '2.0', id: data.id, result }
-        }, targetOrigin)
-        return
-      } else if (data.method === 'trx_sign') {
-        window.tronWeb?.trx.sign(...data.params)
-          .then(result => {
-            target.postMessage({
-              source: 'app',
-              data: { jsonrpc: '2.0', id: data.id, result }
-            }, targetOrigin)
-          })
-          .catch(error => {
-            target.postMessage({
-              source: 'app',
-              data: { jsonrpc: '2.0', id: data.id, error }
-            }, targetOrigin)
-          })
-        return
-      }
-
-      const rpcClient = data.method.startsWith('tron_') ? window.tronLink : window.ethereum
-      rpcClient.request({ method: data.method, params: data.params })
-        .then(result => {
-          if (data.method === 'tron_requestAccounts') {
-            result.defaultAddress = window.tronWeb.defaultAddress
-          }
-          target.postMessage({
-            source: 'app',
-            data: { jsonrpc: '2.0', id: data.id, result }
-          }, targetOrigin)
-        })
-        .catch(error => {
-          target.postMessage({
-            source: 'app',
-            data: { jsonrpc: '2.0', id: data.id, error }
-          }, targetOrigin)
-        })
-      return
-    }
-
-    if (data.initiator === 'meson2') {
-      const evt = new Event('meson2')
-      evt.data = { type: data.type, data: data.data }
+    if (payload.event) {
+      const evt = new Event('meson.to')
+      evt.data = { type: payload.event, data: payload.data }
       window.dispatchEvent(evt)
       return
     }
 
-    if (data.copy) {
-      window.navigator.clipboard.writeText(data.copy)
-    } else if (data.height && onHeight) {
-      onHeight(data.height)
-    } else if (closer) {
-      if (data.close) {
-        dispose()
-        closer.block(false)
-        closer.close()
-      } else if (typeof data.blockClose === 'boolean') {
-        closer.block(data.blockClose)
-      }
+    if (payload.jsonrpc !== '2.0') {
+      return
     }
+
+    let result
+    switch (payload.method) {
+      case 'get_global': {
+        const value = window[payload.params]
+        if (['string', 'number'].includes(typeof value)) {
+          result = value
+        } else if (typeof value === 'object') {
+          result = cloneObject(value)
+        } else {
+          result = null
+        }
+        break
+      }
+      case 'set_height':
+        onHeight(payload.params)
+        result = true
+        break
+      case 'copy':
+        window.navigator.clipboard.writeText(payload.params)
+        result = true
+        break
+      case 'block_close':
+        closer?.block(payload.params)
+        result = true
+        break
+      case 'close':
+        if (closer) {
+          dispose()
+          closer.block(false)
+          closer.close()
+        }
+        result = true
+        break
+      case 'swap_completed':
+        meson2._onCompleted?.(payload.params)
+        result = true
+        break
+      default:
+    }
+
+    if (typeof result !== 'undefined') {
+      meson2.__returnResult(payload.id, result)
+      return
+    }
+
+    if (payload.method === 'trx_sign') {
+      window.tronWeb?.trx.sign(...payload.params)
+        .then(result => {
+          meson2.__returnResult(payload.id, result)
+        })
+        .catch(error => {
+          meson2.__returnResult(payload.id, null, error)
+        })
+      return
+    }
+
+    const rpcClient = payload.method.startsWith('tron_') ? window.tronLink : window.ethereum
+    rpcClient.request({ method: payload.method, params: payload.params })
+      .then(result => {
+        if (payload.method === 'tron_requestAccounts') {
+          result.defaultAddress = window.tronWeb.defaultAddress
+        }
+        meson2.__returnResult(payload.id, result)
+      })
+      .catch(error => {
+        meson2.__returnResult(payload.id, null, error)
+      })
   }
 
-  const onclick = () => {
-    target.postMessage({
-      source: 'app',
-      data: { event: 'onclick-page' }
-    }, targetOrigin)
-  }
+  const onclick = () => meson2.__triggerEvent('onclick-page')
 
   window.addEventListener('message', onmessage)
   window.addEventListener('click', onclick)
