@@ -2,7 +2,7 @@ import React from 'react'
 import classnames from 'classnames'
 import PropTypes from 'prop-types'
 
-import { SUPPORTED_CHAINS } from '../constants'
+import { SUPPORTED_CHAINS } from './constants'
 import useMesonTo from './useMesonTo'
 import styles from './meson2.module.css'
 import Spinner from './spinner.svg'
