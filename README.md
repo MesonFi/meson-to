@@ -91,7 +91,7 @@ Once the script is loaded, you will be able to use `MesonTo` globally.
 The cross-chain'ed stablecoin will be transferred to the app contract from meson's contract. In order to accept the transfer correctly, your app contract needs to implement the `depositWithBeneficiary` method.
 
 ```solidity
-function transferWithBeneficiary(address token, uint256 amount, address beneficiary, uint64 data) external returns (bool);
+function depositWithBeneficiary(address token, uint256 amount, address beneficiary, uint64 data) external returns (bool);
 ```
 
 This will allow the app contract to obtain depositing tokens from meson's contract, but transfer the corresponding benefits (purchased NFTs, exchanged tokens, etc) to the user's address.
