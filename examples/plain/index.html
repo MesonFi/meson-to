@@ -45,11 +45,11 @@
     </div>
   </body>
   <script>
-    const meson2 = new MesonTo(window)
-
-    meson2.onCompleted(data => {
-      document.getElementById('received-display').innerHTML =
-        `Received ${data.amount / 1e6} ${data.from.token} from ${data.fromAddress} of ${data.from.chain}.`
+    const meson2 = new MesonTo(window, {
+      onCompleted: data => {
+        document.getElementById('received-display').innerHTML =
+          `Received ${data.amount / 1e6} ${data.from.token} from ${data.fromAddress} of ${data.from.chain}.`
+      }
     })
 
     function onClickMesonTo (btn) {

@@ -31,7 +31,7 @@ If you want to customize the button, use
 ```js
 // Customized button text
 function ButtonText ({ pending }) {
-  return pending ? '' : ''
+  return pending ? 'Waiting for meson' : 'Deposit with meson'
 }
 
 export default function App () {
@@ -47,17 +47,11 @@ export default function App () {
 }
 ```
 
-See a complete example in `examples/demo`
+See a complete example at https://github.com/MesonFi/meson-to-demo.
 
-#### Plain HTML & JavaScript
+#### Plain JavaScript
 
-You can also add meson.to directly to the html file
-
-```html
-<script src="https://raw.githubusercontent.com/MesonFi/meson-to/main/dist/meson-to.js"></script>
-```
-
-Once the script is loaded, you will be able to use `MesonTo` globally. If you use a package manager for your frontend project, you can also import it through
+If you use a package manager for your frontend project and want to call meson.to with plain JavaScript, import the global `MesonTo` class
 
 ```js
 import MesonTo from '@mesonfi/to'
@@ -67,19 +61,30 @@ To open the popup of MesonTo for cross-chain transfer, run
 
 ```js
 const appId = 'demo'
-const meson2 = new MesonTo(window)
+const meson2 = new MesonTo(window, {
+  onCompleted: data => {
+    // when a cross-chain transfer is successful
+    console.log(data)
+  }
+})
+
 meson2.open(appId)
   .then(() => {
     // on popup closed; doesn't mean a cross-chain transfer is completed
   })
-
-meson2.onCompleted(data => {
-  // when a cross-chain transfer is successful
-  console.log(data)
-})
 ```
 
 See the example project in `examples/plain`.
+
+#### Use with `<script>`
+
+You can also add meson.to directly to the html file
+
+```html
+<script src="https://raw.githubusercontent.com/MesonFi/meson-to/main/dist/meson-to.js"></script>
+```
+
+Once the script is loaded, you will be able to use `MesonTo` globally.
 
 ### Smart contract
 
@@ -101,7 +106,7 @@ Once `depositWithBeneficiary` is supported, you can [contact us]() to register y
 
 - App name
 - Prefered appId (popup will open at https://meson.to/{appId})
-- App URL (need to open popup from it in *release* mode)
+- App URL (need to open the popup from this URL in *release* mode)
 - App icon (w144 x h144)
 - App logo (height 144, width <= 1080)
 - Smart contract info (deployed chain, supported types of stablecoins, contract address)
