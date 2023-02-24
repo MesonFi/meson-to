@@ -19,7 +19,7 @@ export default function MesonToEmbedded ({ appId, to, host, onCompleted, Success
   const meson2 = useMesonTo(window, host, _onCompleted)
 
   React.useEffect(() => {
-    if (!ref.current || !shouldOpen) {
+    if (!ref.current || !meson2 || !shouldOpen) {
       return
     }
 
@@ -28,7 +28,7 @@ export default function MesonToEmbedded ({ appId, to, host, onCompleted, Success
       .catch(err => {
         console.warn(err)
       })
-  }, [ref.current, shouldOpen, appId, to])
+  }, [ref.current, meson2, shouldOpen, appId, to])
 
   const successInfo = React.useMemo(() => {
     if (!data) {
