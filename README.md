@@ -83,7 +83,7 @@ See the example project in `examples/plain`.
 
 ### Smart contract
 
-The cross-chain'ed stablecoin will be transferred to the app contract from meson's contract. In order to accept the transfer correctly, your app contract needs to implement the `transferWithBeneficiary` method.
+The cross-chain'ed stablecoin will be transferred to the app contract from meson's contract. In order to accept the transfer correctly, your app contract needs to implement the `depositWithBeneficiary` method.
 
 ```solidity
 function transferWithBeneficiary(address token, uint256 amount, address beneficiary, uint64 data) external returns (bool);
@@ -95,9 +95,9 @@ See an example in `contracts/SampleAppContract.sol`.
 
 ## Submit app information
 
-In order to keep users' funds safe, we need to confirm that your contract has correctly supported `transferWithBeneficiary`. Otherwise, users' cross-chain assets may be stuck and cannot be withdrawn.
+In order to keep users' funds safe, we need to confirm that your contract has correctly supported `depositWithBeneficiary`. Otherwise, users' cross-chain assets may be stuck and cannot be withdrawn.
 
-Once `transferWithBeneficiary` is supported, you can [contact us]() to register your app. Please have the following information ready
+Once `depositWithBeneficiary` is supported, you can [contact us]() to register your app. Please have the following information ready
 
 - App name
 - Prefered appId (popup will open at https://meson.to/{appId})
