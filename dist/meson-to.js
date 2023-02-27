@@ -17,7 +17,7 @@
       } else if (data.isTronLink) {
         meson2.__postMessageToMesonTo(data);
       } else if (data.to === 'meson.to') {
-        meson2.__triggerEvent(data.event);
+        meson2.__triggerEvent(data.event, data.params);
       }
 
       if (origin !== meson2.host) {
@@ -197,8 +197,8 @@
       }
     }
 
-    __triggerEvent (event) {
-      this.__postMessageToMesonTo({ event });
+    __triggerEvent (event, params) {
+      this.__postMessageToMesonTo({ event, params });
     }
 
     _openPopup (url) {

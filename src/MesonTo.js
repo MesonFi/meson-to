@@ -61,8 +61,8 @@ export default class MesonTo {
     }
   }
 
-  __triggerEvent (event) {
-    this.__postMessageToMesonTo({ event })
+  __triggerEvent (event, params) {
+    this.__postMessageToMesonTo({ event, params })
   }
 
   _openPopup (url) {
