@@ -101,11 +101,11 @@
         });
     };
 
-    const onAccountsChanged = (...args) => {
-      meson2.__triggerEvent('accountsChanged', args);
+    const onAccountsChanged = accounts => {
+      meson2.__triggerEvent('accountsChanged', accounts);
     };
-    const onChainChanged = (...args) => {
-      meson2.__triggerEvent('chainChanged', args);
+    const onChainChanged = chainId => {
+      meson2.__triggerEvent('chainChanged', chainId);
     };
     window.ethereum?.on('accountsChanged', onAccountsChanged);
     window.ethereum?.on('chainChanged', onChainChanged);
