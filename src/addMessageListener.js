@@ -2,13 +2,7 @@ export default function addMessageListener (meson2, onHeight, closer) {
   const { window } = meson2
 
   const onmessage = ({ origin, data }) => {
-    if (data.target === 'metamask-inpage') {
-      const d = data.data.data
-      if (['metamask_chainChanged', 'metamask_accountsChanged'].includes(d.method)) {
-        meson2.__postMessageToMesonTo(d)
-      }
-      return
-    } else if (data.isTronLink) {
+    if (data.isTronLink) {
       meson2.__postMessageToMesonTo(data)
     } else if (data.to === 'meson.to') {
       meson2.__triggerEvent(data.event, data.params)
@@ -47,7 +41,7 @@ export default function addMessageListener (meson2, onHeight, closer) {
         break
       }
       case 'set_height':
-        onHeight(payload.params)
+        onHeight?.(payload.params)
         result = true
         break
       case 'copy':
@@ -102,6 +96,15 @@ export default function addMessageListener (meson2, onHeight, closer) {
       })
   }
 
+  const onAccountsChanged = (...args) => {
+    meson2.__triggerEvent('accountsChanged', args)
+  }
+  const onChainChanged = (...args) => {
+    meson2.__triggerEvent('chainChanged', args)
+  }
+  window.ethereum?.on('accountsChanged', onAccountsChanged)
+  window.ethereum?.on('chainChanged', onChainChanged)
+
   const onclick = () => meson2.__triggerEvent('onclick-page')
 
   window.addEventListener('message', onmessage)
@@ -109,6 +112,8 @@ export default function addMessageListener (meson2, onHeight, closer) {
   const dispose = () => {
     window.removeEventListener('message', onmessage)
     window.removeEventListener('click', onclick)
+    window.ethereum?.removeListener('accountsChanged', onAccountsChanged)
+    window.ethereum?.removeListener('chainChanged', onChainChanged)
   }
 
   return { dispose }
