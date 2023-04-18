@@ -66,6 +66,21 @@
           }
           result = true;
           break
+        case 'check_swap': {
+          if (typeof meson2._onSwapAttempted !== 'function') {
+            meson2.__returnResult(payload.id, true);
+            return
+          }
+          const [swapData, feeData, allowance] = payload.params;
+          meson2._onSwapAttempted({ swapData, feeData, allowance })
+            .then(result => {
+              meson2.__returnResult(payload.id, result);
+            })
+            .catch(error => {
+              meson2.__returnResult(payload.id, null, error);
+            });
+          return
+        }
         case 'swap_completed':
           meson2._onCompleted?.(payload.params);
           result = true;
@@ -156,6 +171,7 @@
         this.host = opts.host;
       }
       this._onCompleted = opts.onCompleted || null;
+      this._onSwapAttempted = opts.onSwapAttempted || null;
       this._promise = null;
       this._mesonToWindow = null;
     }
