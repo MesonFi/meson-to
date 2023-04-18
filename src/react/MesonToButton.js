@@ -7,10 +7,10 @@ import useMesonTo from './useMesonTo'
 import styles from './meson2.module.css'
 import Spinner from './spinner.svg'
 
-export default function MesonToButton ({ appId, to, host, type, onCompleted, className, children }) {
+export default function MesonToButton ({ appId, to, host, type, onCompleted, onSwapAttempted, className, children }) {
   const [pending, setPending] = React.useState(false)
 
-  const meson2 = useMesonTo(window, host, onCompleted)
+  const meson2 = useMesonTo(window, host, { onCompleted, onSwapAttempted })
 
   const onClick = React.useCallback(() => {
     setPending(true)
@@ -57,6 +57,7 @@ MesonToButton.propTypes = {
   host: PropTypes.string,
   type: PropTypes.string,
   onCompleted: PropTypes.func.isRequired,
+  onSwapAttempted: PropTypes.func,
   className: PropTypes.string,
   children: PropTypes.node
 }

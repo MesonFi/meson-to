@@ -2,11 +2,13 @@ import React from 'react'
 
 import MesonTo from '../MesonTo'
 
-export default function useMesonTo (window, host, onCompleted) {
+export default function useMesonTo (window, host, callbacks = {}) {
   const [meson2, setMeson2] = React.useState()
 
-  if (onCompleted && typeof onCompleted !== 'function') {
-    throw new Error('onCompleted is not a valid function')
+  const { onCompleted, onSwapAttempted } = callbacks
+
+  if (typeof onCompleted !== 'function') {
+    throw new Error('callbacks.onCompleted is not a valid function')
   }
 
   React.useEffect(() => {
@@ -21,8 +23,9 @@ export default function useMesonTo (window, host, onCompleted) {
   React.useEffect(() => {
     if (meson2) {
       meson2._onCompleted = onCompleted
+      meson2._onSwapAttempted = onSwapAttempted
     }
-  }, [meson2, onCompleted])
+  }, [meson2, onCompleted, onSwapAttempted])
 
   return meson2
 }

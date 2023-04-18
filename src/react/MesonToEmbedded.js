@@ -5,18 +5,18 @@ import { SUPPORTED_CHAINS } from './constants'
 import useMesonTo from './useMesonTo'
 import styles from './meson2.module.css'
 
-export default function MesonToEmbedded ({ appId, to, host, onCompleted, SuccessInfo }) {
+export default function MesonToEmbedded ({ appId, to, host, onCompleted: _onCompleted, onSwapAttempted, SuccessInfo }) {
   const ref = React.useRef()
   const [shouldOpen, setShouldOpen] = React.useState(true)
   const [data, setData] = React.useState()
 
-  const _onCompleted = React.useCallback(data => {
+  const onCompleted = React.useCallback(data => {
     setShouldOpen(false)
     setData(data)
-    onCompleted(data)
-  }, [onCompleted])
+    _onCompleted(data)
+  }, [_onCompleted])
 
-  const meson2 = useMesonTo(window, host, _onCompleted)
+  const meson2 = useMesonTo(window, host, { onCompleted, onSwapAttempted })
 
   React.useEffect(() => {
     if (!ref.current || !meson2 || !shouldOpen) {
@@ -70,6 +70,7 @@ MesonToEmbedded.propTypes = {
   }),
   host: PropTypes.string,
   onCompleted: PropTypes.func.isRequired,
+  onSwapAttempted: PropTypes.func,
   SuccessInfo: PropTypes.elementType
 }
 
