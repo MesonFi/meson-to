@@ -15,6 +15,7 @@ export default class MesonTo {
       this.host = opts.host
     }
     this._onCompleted = opts.onCompleted || null
+    this._onSwapAttempted = opts.onSwapAttempted || null
     this._promise = null
     this._mesonToWindow = null
   }
