@@ -185,13 +185,13 @@
       if (typeof appIdOrTo === 'string') {
         url = `${this.host}/${appIdOrTo}`;
       } else {
-        const { appId, addr, chain, tokens } = appIdOrTo;
-        url = `${this.host}/${appId}`;
+        const { id, addr, tokens, amount } = appIdOrTo;
+        url = `${this.host}/${id}`;
         if (addr) {
-          url = `${url}/${addr}`;
+          url += `/${addr}`;
         }
-        if (chain || tokens) {
-          url = `${url}?c=${chain || ''}&t=${tokens?.join(',').toLowerCase() || ''}`;
+        if (tokens || amount) {
+          url += `?token=${tokens?.join(',').toLowerCase() || ''}&amount=${Number(amount) || ''}`;
         }
       }
 
@@ -230,7 +230,7 @@
         return this._promise
       }
 
-      const popup = this.window.open(url, 'meson.to', 'width=360,height=640');
+      const popup = this.window.open(url, 'meson.to', 'width=375,height=640');
       this._mesonToWindow = popup;
       const { dispose } = addMessageListener(this);
 
@@ -260,7 +260,7 @@
       const modal = doc.createElement('div');
       modal.style = 'inset:0;z-index:99999;overflow:hidden;display:flex;flex-direction:column;';
       if (!embedded) {
-        modal.style += 'position:fixed;';
+        modal.style.position = 'fixed';
       }
       modal.style['justify-content'] = lgScreen ? 'center' : 'end';
 
@@ -288,7 +288,9 @@
       const content = doc.createElement('div');
       content.style = 'position:relative;width:100%;max-width:440px;flex-shrink:0;';
       if (!embedded) {
-        content.style += 'background:#ecf5f0;overflow:hidden;box-shadow:0 0px 24px 0px rgb(0 0 0 / 40%);';
+        content.style.background = '#ecf5f0';
+        content.style.overflow = 'hidden';
+        content.style['box-shadow'] = '0 0px 24px 0px rgb(0 0 0 / 40%)';
       }
 
       let barWrapper;
@@ -319,9 +321,12 @@
       const loading = doc.createElement('div');
       loading.style = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;';
       loading.innerHTML = 'Loading...';
+      if (!lgScreen && !embedded) {
+        loading.style.height = '592px';
+      }
 
       const iframe = doc.createElement('iframe');
-      iframe.style = 'z-index:50;width:100%;max-height:518px;overflow:hidden;border:none;transition:max-height 0.2s;';
+      iframe.style = 'z-index:50;width:100%;max-height:592px;overflow:hidden;border:none;transition:max-height 0.2s;';
       if (embedded) {
         iframe.style['max-height'] = '216px';
       }
@@ -335,7 +340,6 @@
         if (!embedded) {
           iframe.style.height = 'calc(100vh - 80px)';
         }
-        iframe.style.transform = 'translateY(1000px)';
       }
 
       iframe.onload = () => {
@@ -348,7 +352,12 @@
         }
       };
 
+      let pause = true;
+      setTimeout(() => { pause = false; }, 3000);
       const onHeight = height => {
+        if (pause && height < 592) {
+          return
+        }
         iframe.style['max-height'] = height + 'px';
       };
 
