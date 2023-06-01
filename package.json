@@ -13,6 +13,11 @@
     "lint": "eslint .",
     "prepare": "yarn build"
   },
+  "dependencies": {
+    "@mysten/sui.js": "^0.34.1",
+    "@wallet-standard/core": "^1.0.3",
+    "classnames": "^2.3.2"
+  },
   "devDependencies": {
     "@babel/core": "^7.19.0",
     "@babel/eslint-parser": "^7.19.1",

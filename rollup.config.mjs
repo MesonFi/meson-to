@@ -14,6 +14,7 @@ export default [
     },
     external: [
       '@mesonfi/to',
+      ...Object.keys(pkg.dependencies),
       ...Object.keys(pkg.peerDependencies),
     ],
     plugins: [
@@ -31,7 +32,10 @@ export default [
     output: {
       file: 'dist/meson-to.js',
       name: 'MesonTo',
-      format: 'umd'
+      format: 'umd',
+      globals: {
+        '@wallet-standard/core': 'core'
+      }
     },
     watch: {
       include: 'src/**',

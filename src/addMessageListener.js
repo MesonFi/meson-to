@@ -1,5 +1,9 @@
+import { getWallets as getSuiWallets } from '@wallet-standard/core'
+import { TransactionBlock } from '@mysten/sui.js'
+
 export default function addMessageListener (meson2, onHeight, closer) {
   const { window } = meson2
+  const suiWallets = getSuiWallets().get()
 
   const onmessage = ({ origin, data }) => {
     if (data.isTronLink) {
@@ -96,6 +100,35 @@ export default function addMessageListener (meson2, onHeight, closer) {
           meson2.__returnResult(payload.id, null, error)
         })
       return
+    } else if (payload.method === 'sui_get_wallets') {
+      meson2.__returnResult(payload.id, suiWallets.map(w => cloneObject(Object.fromEntries(
+        'accounts,chains,features,icon,name,version'.split(',').map(k => [k, w[k]])
+      ))))
+      return
+    } else if (payload.method.startsWith('sui:')) {
+      const name = payload.method.split(':')[1]
+      const wallet = suiWallets.find(w => w.name === name)
+      if (!wallet) {
+        meson2.__returnResult(payload.id, null, new Error(`Sui wallet ${name} not registered`))
+        return
+      }
+      const [feat, ...args] = payload.params
+      const func = feat.split(':')[1]
+
+      if (feat === 'sui:signAndExecuteTransactionBlock') {
+        args[0].transactionBlock = TransactionBlock.from(args[0].transactionBlock)
+      }
+      wallet.features[feat][func](...args)
+        .then(result => {
+          if (feat === 'standard:connect') {
+            result.accounts = result.accounts.map(a => cloneObject(Object.fromEntries(
+              'address,chains,features,publicKey'.split(',').map(k => [k, a[k]])
+            )))
+          }
+          meson2.__returnResult(payload.id, result)
+        })
+        .catch(error => meson2.__returnResult(payload.id, null, error))
+      return
     }
 
     const rpcClient = payload.method.startsWith('tron_') ? window.tronLink : window.ethereum
@@ -137,6 +170,13 @@ export default function addMessageListener (meson2, onHeight, closer) {
 function cloneObject (obj, level = 3) {
   if (!obj || !level) {
     return
+  }
+  if (['string', 'number'].includes(typeof obj)) {
+    return obj
+  } else if (Array.isArray(obj)) {
+    return obj.map(item => cloneObject(item, level - 1))
+  } else if (obj instanceof Uint8Array) {
+    return [...obj].map(item => cloneObject(item, level - 1))
   }
   return Object.fromEntries(Object.keys(obj)
     .filter(key => !key.startsWith('_') && typeof obj[key] !== 'function')
