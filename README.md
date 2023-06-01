@@ -105,7 +105,7 @@ In order to keep users' funds safe, we need to confirm that your contract has co
 Once `depositWithBeneficiary` is supported, you can [contact us]() to register your app. Please have the following information ready
 
 - App name
-- Prefered appId (popup will open at https://meson.to/{appId})
+- Preferred appId (popup will open at https://meson.to/{appId})
 - App URL (need to open the popup from this URL in *release* mode)
 - App icon (w144 x h144)
 - App logo (height 144, width <= 1080)
