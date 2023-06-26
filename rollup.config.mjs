@@ -1,17 +1,23 @@
 import babel from '@rollup/plugin-babel'
 import svgr from '@svgr/rollup'
-import postcss from 'rollup-plugin-postcss'
 import external from 'rollup-plugin-peer-deps-external'
-
+import scss from 'rollup-plugin-scss'
+import postcss from 'rollup-plugin-postcss'
 import pkg from './package.json' assert { type: 'json' }
 
 export default [
   {
     input: 'src/react/index.js',
-    output: {
-      file: 'lib/index.js',
-      format: 'es'
-    },
+    output: [
+      {
+        file: 'lib/index.es.js',
+        format: 'es'
+      },
+      {
+        file: 'lib/index.js',
+        format: 'cjs',
+      },
+    ],
     external: [
       '@mesonfi/to',
       ...Object.keys(pkg.dependencies),
@@ -19,7 +25,7 @@ export default [
     ],
     plugins: [
       external(),
-      postcss({ modules: false }),
+      postcss({ inject: true }),
       svgr(),
       babel({ exclude: 'node_modules/**' }),
     ],
@@ -37,6 +43,9 @@ export default [
         '@wallet-standard/core': 'core'
       }
     },
+    plugins: [
+      scss({ output: false }),
+    ],
     watch: {
       include: 'src/**',
     }

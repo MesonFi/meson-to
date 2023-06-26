@@ -3,6 +3,7 @@
   "version": "0.4.1",
   "license": "MIT",
   "main": "lib/index.js",
+  "module": "lib/index.es.js",
   "files": [
     "lib",
     "dist"
@@ -37,7 +38,9 @@
     "postcss": "^8.4.17",
     "rollup": "^3.0.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-postcss": "^4.0.2"
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-scss": "^4.0.0",
+    "sass": "^1.63.6"
   },
   "peerDependencies": {
     "classnames": "*",

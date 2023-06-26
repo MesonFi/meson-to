@@ -1,0 +1,169 @@
+@mixin screen-lg {
+  @media (min-width: 440px) { @content; }
+}
+
+@mixin screen-sm {
+  @media (max-width: 439px) { @content; }
+}
+
+.m2__wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #000b;
+  transition: background-color 0.4s;
+
+  &.m2__in-transition {
+    background-color: transparent;
+  }
+
+  &.m2__embedded {
+    position: relative;
+  }
+}
+
+.m2__container {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  @include screen-lg {
+    max-height: 100%;
+    overflow-y: auto;
+    padding: 24px 0;
+  }
+
+  @include screen-sm {
+    padding-top: 20px;
+    transform: translateY(200px);
+    transition: transform 0.4s;
+
+    .m2__in-transition>& {
+      transform: translateY(900px);
+    }
+  }
+
+  &>.m2__popup {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    flex-shrink: 0;
+    opacity: 1;
+    transition: opacity 0.25s;
+
+    @include screen-lg {
+      .m2__in-transition>& {
+        opacity: 0;
+      }
+    }
+
+    :not(.m2__embedded)>& {
+      background: #ecf5f0;
+      overflow: hidden;
+      box-shadow: 0 0px 24px 0px rgb(0 0 0 / 40%);
+
+      @include screen-lg {
+        border-radius: 20px;
+      }
+
+      @include screen-sm {
+        border-radius: 20px 20px 0 0;
+        padding-bottom: 200px;
+      }
+    }
+
+    &>.m2__loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      @include screen-sm {
+        :not(.m2__embedded)>& {
+          height: 592px;
+        }
+      }
+    }
+
+    &>.m2__iframe {
+      z-index: 50;
+      width: 100%;
+      overflow: hidden;
+      border: none;
+      transition: max-height 0.2s;
+      max-height: 592px;
+
+      @include screen-lg {
+        height: calc(100vh - 48px);
+      }
+
+      .m2__embedded>& {
+        max-height: 216px;
+      }
+
+      :not(.m2__embedded)>& {
+        @include screen-lg {
+          margin-top: -8px;
+        }
+        @include screen-sm {
+          height: calc(100vh - 80px);
+        }
+      }
+    }
+
+    :not(.m2__embedded)>&>.m2__close {
+      @include screen-sm {
+        display: none;
+      }
+
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 12px;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.8);
+      background-color: rgb(255, 168, 168);
+
+      &:hover {
+        color: rgba(255, 255, 255, 0.8);
+        background-color: rgb(255, 96, 96);
+      }
+    }
+  }
+
+  @include screen-sm {
+    &>.m2__bar {
+      z-index: 100;
+      position: absolute;
+      top: 10px;
+      left: calc(50% - 50px);
+      cursor: pointer;
+      transform: translateZ(10px);
+      padding: 20px;
+
+      &::after {
+        content: '';
+        display: block;
+        background: #000;
+        height: 4px;
+        width: 60px;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+    }
+  }
+}
