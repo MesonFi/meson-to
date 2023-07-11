@@ -52,7 +52,9 @@ export default class MesonTo {
       if (tokens || amount) {
         url += `?token=${tokens?.join(',').toLowerCase() || ''}&amount=${Number(amount) || ''}`
       } else if (rest) {
-        url += `?${Object.entries(rest).map(([k, v]) => `${k}=${v}`).join('&')}`
+        url += `?${Object.entries(rest)
+          .filter(([k, v]) => v != null)
+          .map(([k, v]) => `${k}=${v}`).join('&')}`
       }
     }
 
@@ -116,6 +118,10 @@ export default class MesonTo {
     }
 
     const m2Wrapper = new DOMParser().parseFromString(template, 'text/html').body.firstElementChild
+    if (embedded) {
+      m2Wrapper.classList.add('m2__embedded')
+    }
+
     const container = m2Wrapper.querySelector('.m2__container')
 
     const preventDefault = evt => evt.preventDefault()
