@@ -9,7 +9,7 @@ const template = `
     <div class='m2__popup'>
       <div class='m2__loading'></div>
       <iframe class='m2__iframe'></iframe>
-      <div class='m2__close'>×</div>
+      <div class='m2__close'></div>
     </div>
     <div class='m2__bar'></div>
   </div>
@@ -23,7 +23,7 @@ export default class MesonTo {
       writable: false
     })
     if (!opts.host) {
-      this.host = 'https://meson.to'
+      this.host = 'https://m2.meson.fi'
     } else if (opts.host === 'testnet') {
       this.host = 'https://testnet.meson.to'
     } else {
@@ -44,17 +44,32 @@ export default class MesonTo {
     if (typeof appIdOrTo === 'string') {
       url = `${this.host}/${appIdOrTo}`
     } else {
-      const { id, addr, tokens, amount, ...rest } = appIdOrTo
+      const { id, addr, tokens, amount, provider, ...rest } = appIdOrTo
       url = `${this.host}/${id}`
       if (addr) {
         url += `/${addr}`
       }
-      if (tokens || amount) {
-        url += `?token=${tokens?.join(',').toLowerCase() || ''}&amount=${Number(amount) || ''}`
-      } else if (rest) {
-        url += `?${Object.entries(rest)
+      let queryList = []
+      if (tokens) {
+        queryList.push(`token=${tokens?.join(',').toLowerCase() || ''}`)
+      }
+      if (amount) {
+        queryList.push(`amount=${Number(amount) || ''}`)
+      }
+      if (provider) {
+        this.window.__m2_ethereum = {
+          isParticleNetwork: provider.isParticleNetwork,
+          request: ({ method, params }) => provider.request({ method: method.replace('m2_', ''), params })
+        }
+      }
+      if (rest) {
+        queryList = queryList.concat(Object.entries(rest)
           .filter(([k, v]) => v != null)
-          .map(([k, v]) => `${k}=${v}`).join('&')}`
+          .map(([k, v]) => `${k}=${v}`)
+        )
+      }
+      if (queryList.length) {
+        url += `?${queryList.join('&')}`
       }
     }
 
@@ -95,12 +110,12 @@ export default class MesonTo {
 
     const popup = this.window.open(url, 'meson.to', 'width=375,height=640')
     this._mesonToWindow = popup
-    const { dispose } = addMessageListener(this)
+    this._dispose = addMessageListener(this).dispose
 
     this._promise = new Promise(resolve => {
       const h = setInterval(() => {
         if (popup.closed) {
-          dispose()
+          this._dispose()
           clearInterval(h)
           this._promise = null
           resolve()
@@ -112,12 +127,16 @@ export default class MesonTo {
     return this._promise
   }
 
-  _openIframe (url, parent = this.window.document.body, embedded = false) {
+  _openIframe (url, target = this.window.document.body, embedded = false) {
     if (this._promise) {
       return this._promise
     }
 
     const m2Wrapper = new DOMParser().parseFromString(template, 'text/html').body.firstElementChild
+
+    this.window.targetDom = target
+    this.window.m2Wrapper = m2Wrapper
+
     if (embedded) {
       m2Wrapper.classList.add('m2__embedded')
     }
@@ -139,11 +158,16 @@ export default class MesonTo {
       loading.parentElement.removeChild(loading)
       iframe.onload = undefined
     }
+    if (embedded) {
+      iframe.style.height = '100%'
+    }
 
     let pause = true
     setTimeout(() => { pause = false }, 3000)
     const onHeight = height => {
-      if (pause && height < 592) {
+      if (embedded) {
+        return
+      } else if (pause && height < 592) {
         return
       }
       iframe.style['max-height'] = height + 'px'
@@ -174,7 +198,7 @@ export default class MesonTo {
             if (delta < 100) {
               container.removeAttribute('style')
             } else {
-              closer.close()
+              self.closer.close()
             }
             bar.ontouchmove = null
             bar.ontouchend = null
@@ -182,21 +206,21 @@ export default class MesonTo {
         }
       }
 
-      const closer = {
+      self.closer = {
         blocked: false,
         block (blocked = true) {
           this.blocked = blocked
         },
-        close () {
+        close (force) {
           container.removeAttribute('style')
-          if (this.blocked) {
+          if (!force && this.blocked) {
             self.__triggerEvent('close-blocked')
             return
           }
 
           m2Wrapper.classList.add('m2__in-transition')
           setTimeout(() => {
-            parent.removeChild(m2Wrapper)
+            target.removeChild(m2Wrapper)
           }, 400)
           self._promise = null
 
@@ -205,12 +229,12 @@ export default class MesonTo {
         }
       }
 
-      parent.appendChild(m2Wrapper)
-      m2Wrapper.addEventListener('click', () => closer.close())
-      m2Wrapper.querySelector('.m2__close').addEventListener('click', () => closer.close())
+      target.appendChild(m2Wrapper)
+      m2Wrapper.addEventListener('click', () => this.closer.close())
+      m2Wrapper.querySelector('.m2__close').addEventListener('click', () => this.closer.close())
 
       this._mesonToWindow = iframe.contentWindow
-      const { dispose } = addMessageListener(this, onHeight, closer)
+      const { dispose } = addMessageListener(this, onHeight, this.closer)
 
       setTimeout(() => {
         m2Wrapper.classList.remove('m2__in-transition')
@@ -221,6 +245,10 @@ export default class MesonTo {
   }
 
   dispose () {
-    // TODO
+    if (this.closer) {
+      this.closer.close()
+    } else if (this._dispose) {
+      this._dispose()
+    }
   }
 }

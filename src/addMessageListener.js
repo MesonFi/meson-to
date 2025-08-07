@@ -59,8 +59,7 @@ export default function addMessageListener (meson2, onHeight, closer) {
       case 'close':
         if (closer) {
           dispose()
-          closer.block(false)
-          closer.close()
+          closer.close(true)
         }
         result = true
         break
@@ -131,7 +130,14 @@ export default function addMessageListener (meson2, onHeight, closer) {
       return
     }
 
-    const rpcClient = payload.method.startsWith('tron_') ? window.tronLink : window.ethereum
+    let rpcClient
+    if (payload.method.startsWith('tron_')) {
+      rpcClient = window.tronLink
+    } else if (payload.method.startsWith('m2_')) {
+      rpcClient = window.__m2_ethereum
+    } else {
+      rpcClient = window.ethereum
+    }
     rpcClient.request({ method: payload.method, params: payload.params })
       .then(result => {
         if (payload.method === 'tron_requestAccounts') {

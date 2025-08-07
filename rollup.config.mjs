@@ -10,13 +10,9 @@ export default [
     input: 'src/react/index.js',
     output: [
       {
-        file: 'lib/index.es.js',
+        file: 'react/index.js',
         format: 'es'
-      },
-      {
-        file: 'lib/index.js',
-        format: 'cjs',
-      },
+      }
     ],
     external: [
       '@mesonfi/to',
@@ -35,16 +31,23 @@ export default [
   },
   {
     input: 'src/MesonTo.js',
-    output: {
-      file: 'dist/meson-to.js',
-      name: 'MesonTo',
-      format: 'umd',
-      globals: {
-        '@wallet-standard/core': 'core'
-      }
-    },
+    output: [
+      {
+        file: 'lib/index.js',
+        format: 'es',
+      },
+      {
+        file: 'dist/meson-to.js',
+        name: 'MesonTo',
+        format: 'umd',
+        globals: {
+          '@wallet-standard/core': 'core'
+        }
+      },
+    ],
     plugins: [
-      scss({ output: false }),
+      external(),
+      postcss({ inject: true }),
     ],
     watch: {
       include: 'src/**',
