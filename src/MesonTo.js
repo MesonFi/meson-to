@@ -57,10 +57,7 @@ export default class MesonTo {
         queryList.push(`amount=${Number(amount) || ''}`)
       }
       if (provider) {
-        this.window.__m2_ethereum = {
-          isParticleNetwork: provider.isParticleNetwork,
-          request: ({ method, params }) => provider.request({ method: method.replace('m2_', ''), params })
-        }
+        window.__m2_ethereum = provider
       }
       if (rest) {
         queryList = queryList.concat(Object.entries(rest)

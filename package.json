@@ -3,6 +3,19 @@
   "version": "0.5.0-rc.2",
   "license": "MIT",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "require": "./lib/index.js"
+    },
+    "./react": {
+      "types": "./react/index.d.ts",
+      "import": "./react/index.js",
+      "require": "./react/index.js"
+    }
+  },
   "files": [
     "lib",
     "dist",
@@ -37,6 +50,7 @@
     "eslint-plugin-react": "^7.31.10",
     "postcss": "^8.4.17",
     "rollup": "^3.0.0",
+    "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-scss": "^4.0.0",

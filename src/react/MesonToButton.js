@@ -7,11 +7,20 @@ import useMesonTo from './useMesonTo'
 import styles from './meson2.module.css'
 import Spinner from './spinner.svg'
 
-export default function MesonToButton ({ appId, to, host, target, onCompleted, onSwapAttempted, className, children }) {
+export default function MesonToButton ({
+  appId = 'demo',
+  to,
+  host,
+  target,
+  onCompleted = () => {},
+  onSwapAttempted,
+  className,
+  children
+}) {
   const [pending, setPending] = React.useState(false)
   const ref = React.useRef()
 
-  const meson2 = useMesonTo(window, host, { onCompleted, onSwapAttempted })
+  const meson2 = useMesonTo(typeof window !== 'undefined' ? window : null, host, { onCompleted, onSwapAttempted })
 
   const onClick = React.useCallback((_target = target) => {
     setPending(true)
@@ -70,21 +79,16 @@ MesonToButton.propTypes = {
     addr: PropTypes.string,
     chain: PropTypes.oneOf(SUPPORTED_CHAINS),
     tokens: PropTypes.arrayOf(PropTypes.string),
-    amount: PropTypes.number
+    amount: PropTypes.number,
+    provider: PropTypes.any
   }),
   host: PropTypes.string,
   target: PropTypes.oneOfType([
-    PropTypes.oneOf(['iframe', 'popup', 'parent']),
-    PropTypes.instanceOf(Element)
+    PropTypes.oneOf(['iframe', 'popup', 'parent'])
+    // PropTypes.instanceOf(window.Element)
   ]),
   onCompleted: PropTypes.func.isRequired,
   onSwapAttempted: PropTypes.func,
   className: PropTypes.string,
   children: PropTypes.node
-}
-
-MesonToButton.defaultProps = {
-  appId: 'demo',
-  isTestnet: false,
-  onCompleted: () => {}
 }

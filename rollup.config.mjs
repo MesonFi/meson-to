@@ -3,6 +3,7 @@ import svgr from '@svgr/rollup'
 import external from 'rollup-plugin-peer-deps-external'
 import scss from 'rollup-plugin-scss'
 import postcss from 'rollup-plugin-postcss'
+import copy from 'rollup-plugin-copy'
 import pkg from './package.json' assert { type: 'json' }
 
 export default [
@@ -24,6 +25,11 @@ export default [
       postcss({ inject: true }),
       svgr(),
       babel({ exclude: 'node_modules/**' }),
+      copy({
+        targets: [
+          { src: 'src/react/index.d.ts', dest: 'react' }
+        ]
+      })
     ],
     watch: {
       include: 'src/**',
@@ -48,6 +54,11 @@ export default [
     plugins: [
       external(),
       postcss({ inject: true }),
+      copy({
+        targets: [
+          { src: 'src/index.d.ts', dest: 'lib' }
+        ]
+      })
     ],
     watch: {
       include: 'src/**',

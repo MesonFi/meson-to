@@ -5,7 +5,14 @@ import { SUPPORTED_CHAINS } from './constants'
 import useMesonTo from './useMesonTo'
 import styles from './meson2.module.css'
 
-export default function MesonToEmbedded ({ appId, to, host, onCompleted: _onCompleted, onSwapAttempted, SuccessInfo }) {
+export default function MesonToEmbedded ({
+  appId = 'demo',
+  to,
+  host,
+  onCompleted: _onCompleted = () => {},
+  onSwapAttempted,
+  SuccessInfo
+}) {
   const ref = React.useRef()
   const [shouldOpen, setShouldOpen] = React.useState(true)
   const [data, setData] = React.useState()
@@ -16,7 +23,7 @@ export default function MesonToEmbedded ({ appId, to, host, onCompleted: _onComp
     _onCompleted(data)
   }, [_onCompleted])
 
-  const meson2 = useMesonTo(window, host, { onCompleted, onSwapAttempted })
+  const meson2 = useMesonTo(typeof window !== 'undefined' ? window : null, host, { onCompleted, onSwapAttempted })
 
   React.useEffect(() => {
     if (!ref.current || !meson2 || !shouldOpen) {
@@ -67,16 +74,11 @@ MesonToEmbedded.propTypes = {
     addr: PropTypes.string,
     chain: PropTypes.oneOf(SUPPORTED_CHAINS),
     tokens: PropTypes.arrayOf(PropTypes.string),
-    amount: PropTypes.number
+    amount: PropTypes.number,
+    provider: PropTypes.any
   }),
   host: PropTypes.string,
   onCompleted: PropTypes.func.isRequired,
   onSwapAttempted: PropTypes.func,
   SuccessInfo: PropTypes.elementType
-}
-
-MesonToEmbedded.defaultProps = {
-  appId: 'demo',
-  isTestnet: false,
-  onCompleted: () => {}
 }

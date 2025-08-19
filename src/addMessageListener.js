@@ -4,6 +4,7 @@ import { TransactionBlock } from '@mysten/sui.js'
 export default function addMessageListener (meson2, onHeight, closer) {
   const { window } = meson2
   const suiWallets = getSuiWallets().get()
+  const evmWallets = getEvmWallets(window)
 
   const onmessage = ({ origin, data }) => {
     if (data.isTronLink) {
@@ -31,6 +32,7 @@ export default function addMessageListener (meson2, onHeight, closer) {
       return
     }
 
+    const { rdns } = payload.extra || {}
     let result
     switch (payload.method) {
       case 'get_global': {
@@ -136,18 +138,24 @@ export default function addMessageListener (meson2, onHeight, closer) {
     } else if (payload.method.startsWith('m2_')) {
       rpcClient = window.__m2_ethereum
     } else {
-      rpcClient = window.ethereum
+      rpcClient = evmWallets.find(w => w.info.rdns === rdns)?.provider
+      if (!rpcClient) {
+        rpcClient = window.ethereum
+      }
     }
-    rpcClient.request({ method: payload.method, params: payload.params })
-      .then(result => {
-        if (payload.method === 'tron_requestAccounts') {
-          result.defaultAddress = window.tronWeb.defaultAddress
-        }
-        meson2.__returnResult(payload.id, result)
-      })
-      .catch(error => {
-        meson2.__returnResult(payload.id, null, error)
-      })
+
+    if (rpcClient) {
+      rpcClient.request({ method: payload.method.replace(/^m2_/, ''), params: payload.params })
+        .then(result => {
+          if (payload.method === 'tron_requestAccounts') {
+            result.defaultAddress = window.tronWeb.defaultAddress
+          }
+          meson2.__returnResult(payload.id, result)
+        })
+        .catch(error => {
+          meson2.__returnResult(payload.id, null, error)
+        })
+    }
   }
 
   const onAccountsChanged = accounts => {
@@ -191,4 +199,15 @@ function cloneObject (obj, level = 3) {
       typeof obj[key] === 'object' ? cloneObject(obj[key], level - 1) : obj[key]
     ])
   )
+}
+
+const getEvmWallets = (window) => {
+  const evmWallets = []
+  if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('eip6963:announceProvider', event => {
+      evmWallets.push(event.detail)
+    })
+    window.dispatchEvent(new Event('eip6963:requestProvider'))
+  }
+  return evmWallets
 }
