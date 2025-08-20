@@ -7,6 +7,7 @@
   function addMessageListener (meson2, onHeight, closer) {
     const { window } = meson2;
     const suiWallets = core.getWallets().get();
+    const evmWallets = getEvmWallets(window);
 
     const onmessage = ({ origin, data }) => {
       if (data.isTronLink) {
@@ -34,6 +35,7 @@
         return
       }
 
+      const { rdns } = payload.extra || {};
       let result;
       switch (payload.method) {
         case 'get_global': {
@@ -62,26 +64,10 @@
         case 'close':
           if (closer) {
             dispose();
-            closer.block(false);
-            closer.close();
+            closer.close(true);
           }
           result = true;
           break
-        case 'check_swap': {
-          if (typeof meson2._onSwapAttempted !== 'function') {
-            meson2.__returnResult(payload.id, true);
-            return
-          }
-          const [swapData, feeData, allowance] = payload.params;
-          meson2._onSwapAttempted({ swapData, feeData, allowance })
-            .then(result => {
-              meson2.__returnResult(payload.id, result);
-            })
-            .catch(error => {
-              meson2.__returnResult(payload.id, null, error);
-            });
-          return
-        }
         case 'swap_completed':
           meson2._onCompleted?.(payload.params);
           result = true;
@@ -133,17 +119,30 @@
         return
       }
 
-      const rpcClient = payload.method.startsWith('tron_') ? window.tronLink : window.ethereum;
-      rpcClient.request({ method: payload.method, params: payload.params })
-        .then(result => {
-          if (payload.method === 'tron_requestAccounts') {
-            result.defaultAddress = window.tronWeb.defaultAddress;
-          }
-          meson2.__returnResult(payload.id, result);
-        })
-        .catch(error => {
-          meson2.__returnResult(payload.id, null, error);
-        });
+      let rpcClient;
+      if (payload.method.startsWith('tron_')) {
+        rpcClient = window.tronLink;
+      } else if (payload.method.startsWith('m2_')) {
+        rpcClient = window.__m2_ethereum;
+      } else {
+        rpcClient = evmWallets.find(w => w.info.rdns === rdns)?.provider;
+        if (!rpcClient) {
+          rpcClient = window.ethereum;
+        }
+      }
+
+      if (rpcClient) {
+        rpcClient.request({ method: payload.method.replace(/^m2_/, ''), params: payload.params })
+          .then(result => {
+            if (payload.method === 'tron_requestAccounts') {
+              result.defaultAddress = window.tronWeb.defaultAddress;
+            }
+            meson2.__returnResult(payload.id, result);
+          })
+          .catch(error => {
+            meson2.__returnResult(payload.id, null, error);
+          });
+      }
     };
 
     const onAccountsChanged = accounts => {
@@ -189,10 +188,59 @@
     )
   }
 
-  function isMobile (window) {
-    const platform = window.navigator.userAgentData?.platform || window.navigator.platform || 'unknown';
-    return /(iPhone|iPad|iPod|Linux arm|Linux aar|Android)/.test(platform)
+  const getEvmWallets = (window) => {
+    const evmWallets = [];
+    if (typeof window !== 'undefined' && window.addEventListener) {
+      window.addEventListener('eip6963:announceProvider', event => {
+        evmWallets.push(event.detail);
+      });
+      window.dispatchEvent(new Event('eip6963:requestProvider'));
+    }
+    return evmWallets
+  };
+
+  function styleInject(css, ref) {
+    if ( ref === void 0 ) ref = {};
+    var insertAt = ref.insertAt;
+
+    if (!css || typeof document === 'undefined') { return; }
+
+    var head = document.head || document.getElementsByTagName('head')[0];
+    var style = document.createElement('style');
+    style.type = 'text/css';
+
+    if (insertAt === 'top') {
+      if (head.firstChild) {
+        head.insertBefore(style, head.firstChild);
+      } else {
+        head.appendChild(style);
+      }
+    } else {
+      head.appendChild(style);
+    }
+
+    if (style.styleSheet) {
+      style.styleSheet.cssText = css;
+    } else {
+      style.appendChild(document.createTextNode(css));
+    }
   }
+
+  var css_248z = "@charset \"UTF-8\";\n.m2__wrapper {\n  position: fixed;\n  inset: 0;\n  z-index: 99999;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  overflow: hidden;\n  background-color: rgba(0, 0, 0, 0.7333333333);\n  transition: background-color 0.4s;\n}\n.m2__wrapper.m2__in-transition {\n  background-color: transparent;\n}\n.m2__wrapper.m2__embedded {\n  position: relative;\n  width: 100%;\n  height: 100%;\n  background-color: transparent;\n}\n\n.m2__container {\n  position: relative;\n  z-index: 10;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n}\n.m2__embedded > .m2__container {\n  height: 100%;\n}\n@media (min-width: 440px) {\n  :not(.m2__embedded) > .m2__container {\n    max-height: 100%;\n    overflow-y: auto;\n    padding: 24px 0;\n  }\n}\n@media (max-width: 439px) {\n  :not(.m2__embedded) > .m2__container {\n    padding-top: 20px;\n    transform: translateY(200px);\n    transition: transform 0.4s;\n  }\n}\n@media (max-width: 439px) {\n  :not(.m2__embedded) > .m2__in-transition > .m2__container {\n    transform: translateY(900px);\n  }\n}\n.m2__container > .m2__popup {\n  position: relative;\n  width: 100%;\n  flex-shrink: 0;\n  opacity: 1;\n  transition: opacity 0.25s;\n}\n@media (min-width: 440px) {\n  .m2__in-transition > .m2__container > .m2__popup {\n    opacity: 0;\n  }\n}\n.m2__embedded > .m2__container > .m2__popup {\n  height: 100%;\n}\n:not(.m2__embedded) > .m2__container > .m2__popup {\n  max-width: 440px;\n  background: #ecf5f0;\n  overflow: hidden;\n  box-shadow: 0 0px 24px 0px rgba(0, 0, 0, 0.4);\n}\n@media (min-width: 440px) {\n  :not(.m2__embedded) > .m2__container > .m2__popup {\n    border-radius: 20px;\n  }\n}\n@media (max-width: 439px) {\n  :not(.m2__embedded) > .m2__container > .m2__popup {\n    border-radius: 20px 20px 0 0;\n    padding-bottom: 200px;\n  }\n}\n.m2__container > .m2__popup > .m2__loading {\n  position: absolute;\n  inset: 0;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.m2__container > .m2__popup > .m2__loading::after {\n  content: \"Loading...\";\n}\n@media (max-width: 439px) {\n  :not(.m2__embedded) > .m2__container > .m2__popup > .m2__loading {\n    height: 592px;\n  }\n}\n.m2__container > .m2__popup > .m2__iframe {\n  z-index: 50;\n  width: 100%;\n  overflow: hidden;\n  border: none;\n  transition: max-height 0.2s;\n}\n@media (min-width: 440px) {\n  :not(.m2__embedded) > .m2__container > .m2__popup > .m2__iframe {\n    max-height: 592px;\n    height: calc(100vh - 48px);\n    margin-top: -8px;\n  }\n}\n@media (max-width: 439px) {\n  :not(.m2__embedded) > .m2__container > .m2__popup > .m2__iframe {\n    max-height: 592px;\n    height: calc(100vh - 80px);\n  }\n}\n@media (min-width: 440px) {\n  :not(.m2__embedded) > .m2__container > .m2__popup > .m2__close::after {\n    content: \"×\";\n    position: absolute;\n    top: 12px;\n    right: 12px;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    width: 16px;\n    height: 16px;\n    border-radius: 8px;\n    font-size: 12px;\n    line-height: 12px;\n    cursor: pointer;\n    color: rgba(255, 255, 255, 0.8);\n    background-color: rgb(255, 168, 168);\n  }\n  :not(.m2__embedded) > .m2__container > .m2__popup > .m2__close::after:hover {\n    color: rgba(255, 255, 255, 0.8);\n    background-color: rgb(255, 96, 96);\n  }\n}\n@media (max-width: 439px) {\n  :not(.m2__embedded) > .m2__container > .m2__bar {\n    z-index: 100;\n    position: absolute;\n    top: 10px;\n    left: calc(50% - 50px);\n    cursor: pointer;\n    transform: translateZ(10px);\n    padding: 20px;\n  }\n  :not(.m2__embedded) > .m2__container > .m2__bar::after {\n    content: \"\";\n    display: block;\n    background: #000;\n    height: 4px;\n    width: 60px;\n    border-radius: 2px;\n    overflow: hidden;\n  }\n}";
+  styleInject(css_248z);
+
+  const template = `
+<div class='m2__wrapper m2__in-transition'>
+  <div class='m2__container'>
+    <div class='m2__popup'>
+      <div class='m2__loading'></div>
+      <iframe class='m2__iframe'></iframe>
+      <div class='m2__close'></div>
+    </div>
+    <div class='m2__bar'></div>
+  </div>
+</div>
+`;
 
   class MesonTo {
     constructor (window, opts = {}) {
@@ -201,46 +249,41 @@
         writable: false
       });
       if (!opts.host) {
-        this.host = 'https://meson.to';
+        this.host = 'https://m2.meson.fi';
       } else if (opts.host === 'testnet') {
         this.host = 'https://testnet.meson.to';
       } else {
         this.host = opts.host;
       }
       this._onCompleted = opts.onCompleted || null;
-      this._onSwapAttempted = opts.onSwapAttempted || null;
       this._promise = null;
       this._mesonToWindow = null;
     }
 
-    async open (appIdOrTo, target) {
-      if (!target) {
-        target = isMobile(this.window) ? 'iframe' : 'popup';
-      }
+    async open (options) {
+      const { to, from = ['chain', 'cex'], recipient, amount, tokens, provider } = options;
 
-      let url;
-      if (typeof appIdOrTo === 'string') {
-        url = `${this.host}/${appIdOrTo}`;
-      } else {
-        const { id, addr, tokens, amount } = appIdOrTo;
-        url = `${this.host}/${id}`;
-        if (addr) {
-          url += `/${addr}`;
-        }
-        if (tokens || amount) {
-          url += `?token=${tokens?.join(',').toLowerCase() || ''}&amount=${Number(amount) || ''}`;
-        }
+      let url = `${this.host}/${to}`;
+      if (recipient) {
+        url += `/${recipient}`;
       }
-
-      if (target === 'iframe') {
-        return this._openIframe(url)
-      } else if (target === 'popup') {
-        return this._openPopup(url)
-      } else if (target) {
-        return this._openIframe(url, target, true)
-      } else {
-        throw new Error(`Unknown open target: ${target}`)
+      const queryList = [];
+      if (Array.isArray(from) && from.length > 0) {
+        queryList.push(`from=${from.join(',')}`);
       }
+      if (tokens) {
+        queryList.push(`token=${tokens?.join(',').toLowerCase() || ''}`);
+      }
+      if (amount) {
+        queryList.push(`amount=${Number(amount) || ''}`);
+      }
+      if (provider) {
+        window.__m2_ethereum = provider;
+      }
+      if (queryList.length) {
+        url += `?${queryList.join('&')}`;
+      }
+      return this._openIframe(url)
     }
 
     __postMessageToMesonTo (payload) {
@@ -259,184 +302,65 @@
       this.__postMessageToMesonTo({ event, params });
     }
 
-    _openPopup (url) {
-      if (this._promise) {
-        if (this._promise.focus) {
-          this._promise.focus();
-        }
-        return this._promise
-      }
-
-      const popup = this.window.open(url, 'meson.to', 'width=375,height=640');
-      this._mesonToWindow = popup;
-      const { dispose } = addMessageListener(this);
-
-      this._promise = new Promise(resolve => {
-        const h = setInterval(() => {
-          if (popup.closed) {
-            dispose();
-            clearInterval(h);
-            this._promise = null;
-            resolve();
-          }
-        }, 500);
-      });
-      this._promise.focus = () => popup.focus();
-
-      return this._promise
-    }
-
-    _openIframe (url, parent = this.window.document.body, embedded = false) {
+    _openIframe (url, target = this.window.document.body, embedded = false) {
       if (this._promise) {
         return this._promise
       }
 
-      const doc = this.window.document;
-      const lgScreen = embedded || (this.window.innerWidth > 440);
+      const m2Wrapper = new DOMParser().parseFromString(template, 'text/html').body.firstElementChild;
 
-      const modal = doc.createElement('div');
-      modal.style = 'inset:0;z-index:99999;overflow:hidden;display:flex;flex-direction:column;';
-      if (!embedded) {
-        modal.style.position = 'fixed';
-      }
-      modal.style['justify-content'] = lgScreen ? 'center' : 'end';
+      this.window.targetDom = target;
+      this.window.m2Wrapper = m2Wrapper;
 
-      const backdrop = doc.createElement('div');
-      backdrop.style = 'position:fixed;inset:0;transition:background 0.4s;';
-      backdrop.ontouchmove = evt => evt.preventDefault();
-
-      const container = doc.createElement('div');
-      container.style = 'z-index:10;display:flex;flex-direction:column;align-items:center;';
-      container.ontouchmove = evt => evt.preventDefault();
-
-      if (lgScreen) {
-        if (!embedded) {
-          container.style.padding = '24px 0';
-        }
-        container.style['max-height'] = '100%';
-        container.style['overflow-y'] = 'auto';
-      } else {
-        container.style['padding-top'] = '20px';
-        container.style.transform = 'translateY(900px)';
-        container.style.transition = 'transform 0.4s';
-        container.onclick = evt => evt.stopPropagation();
-      }
-
-      const content = doc.createElement('div');
-      content.style = 'position:relative;width:100%;max-width:440px;flex-shrink:0;';
-      if (!embedded) {
-        content.style.background = '#ecf5f0';
-        content.style.overflow = 'hidden';
-        content.style['box-shadow'] = '0 0px 24px 0px rgb(0 0 0 / 40%)';
-      }
-
-      let barWrapper;
-      if (lgScreen) {
-        content.style['border-radius'] = '20px';
-        content.style.opacity = '0';
-        content.style.transition = 'opacity 0.25s';
-        if (!embedded) {
-          const close = doc.createElement('div');
-          close.style = 'position:absolute;top:12px;right:16px;height:24px;font-size:28px;line-height:24px;cursor:pointer;color:#0004;';
-          close.onmouseover = () => { close.style.color = '#000a'; };
-          close.onmouseout = () => { close.style.color = '#0004'; };
-          close.innerHTML = '×';
-          content.appendChild(close);
-        }
-      } else {
-        content.style['border-radius'] = '20px 20px 0 0';
-        content.style['padding-bottom'] = '200px';
-        barWrapper = doc.createElement('div');
-        barWrapper.style = 'z-index:100;position:absolute;top:10px;left:calc(50% - 50px);cursor:pointer;';
-        barWrapper.style.transform = 'translateZ(10px)';
-        const bar = doc.createElement('div');
-        bar.style = 'background:#000;height:4px;width:60px;border-radius:2px;margin:20px;overflow:hidden;';
-        container.appendChild(barWrapper);
-        barWrapper.appendChild(bar);
-      }
-
-      const loading = doc.createElement('div');
-      loading.style = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;';
-      loading.innerHTML = 'Loading...';
-      if (!lgScreen && !embedded) {
-        loading.style.height = '592px';
-      }
-
-      const iframe = doc.createElement('iframe');
-      iframe.style = 'z-index:50;width:100%;max-height:592px;overflow:hidden;border:none;transition:max-height 0.2s;';
       if (embedded) {
-        iframe.style['max-height'] = '216px';
-      }
-      iframe.src = url;
-      if (lgScreen) {
-        iframe.style.height = 'calc(100vh - 48px)';
-        if (!embedded) {
-          iframe.style['margin-top'] = '-8px';
-        }
-      } else {
-        if (!embedded) {
-          iframe.style.height = 'calc(100vh - 80px)';
-        }
+        m2Wrapper.classList.add('m2__embedded');
       }
 
+      const container = m2Wrapper.querySelector('.m2__container');
+
+      const preventDefault = evt => evt.preventDefault();
+      const stopEvent = evt => evt.stopPropagation();
+
+      m2Wrapper.addEventListener('touchmove', preventDefault);
+      container.addEventListener('click', preventDefault);
+      container.addEventListener('touchmove', preventDefault);
+      m2Wrapper.querySelector('.m2__popup').addEventListener('click', stopEvent);
+
+      const iframe = m2Wrapper.querySelector('.m2__iframe');
+      iframe.src = url;
       iframe.onload = () => {
-        content.removeChild(loading);
+        const loading = m2Wrapper.querySelector('.m2__loading');
+        loading.parentElement.removeChild(loading);
         iframe.onload = undefined;
-        if (!lgScreen) {
-          setTimeout(() => {
-            iframe.style.transform = '';
-          }, 100);
-        }
       };
+      if (embedded) {
+        iframe.style.height = '100%';
+      }
 
       let pause = true;
       setTimeout(() => { pause = false; }, 3000);
       const onHeight = height => {
-        if (pause && height < 592) {
+        if (embedded) {
+          return
+        } else if (pause && height < 592) {
           return
         }
         iframe.style['max-height'] = height + 'px';
       };
 
-      if (!embedded) {
-        modal.appendChild(backdrop);
-      }
-      modal.appendChild(container);
-      container.appendChild(content);
-      content.appendChild(loading);
-      content.appendChild(iframe);
-
       const self = this;
       this._promise = new Promise(resolve => {
-        if (barWrapper) {
+        const bar = m2Wrapper.querySelector('.m2__bar');
+        if (bar) {
           let delta = 0;
-          barWrapper.ontouchstart = evt => {
+          bar.ontouchstart = evt => {
+            console.log('touch start');
             evt.preventDefault();
             const initY = evt.touches[0].clientY;
             container.style.transition = 'none';
 
-            const mask = doc.createElement('div');
-            mask.style = 'position:absolute;inset:0;z-index:100;';
-            mask.onclick = evt => evt.stopPropagation();
-            barWrapper.ontouchend = evt => {
-              if (delta < 100) {
-                container.style.transition = 'transform 0.4s';
-                container.style.transform = 'translateY(200px)';
-              } else {
-                container.style.transition = 'transform 0.2s';
-                container.style['transition-timing-function'] = 'linear';
-                closer.close();
-                setTimeout(() => {
-                  container.style['transition-timing-function'] = 'ease';
-                  container.style.transition = 'transform 0.4s';
-                }, 200);
-              }
-              evt.preventDefault();
-              modal.removeChild(mask);
-              barWrapper.ontouchmove = null;
-              barWrapper.ontouchend = null;
-            };
-            barWrapper.ontouchmove = evt => {
+            bar.ontouchmove = evt => {
+              console.log('touch move');
               evt.preventDefault();
               delta = evt.touches[0].clientY - initY;
               if (delta < -100) {
@@ -444,29 +368,34 @@
               }
               container.style.transform = `translateY(${200 + delta}px)`;
             };
-            modal.appendChild(mask);
+            bar.ontouchend = evt => {
+              evt.preventDefault();
+              if (delta < 100) {
+                container.removeAttribute('style');
+              } else {
+                self.closer.close();
+              }
+              bar.ontouchmove = null;
+              bar.ontouchend = null;
+            };
           };
         }
 
-        const closer = {
+        self.closer = {
           blocked: false,
           block (blocked = true) {
             this.blocked = blocked;
           },
-          close () {
-            if (this.blocked) {
+          close (force) {
+            container.removeAttribute('style');
+            if (!force && this.blocked) {
               self.__triggerEvent('close-blocked');
-              container.style.transform = 'translateY(200px)';
               return
             }
-            if (lgScreen) {
-              content.style.opacity = '0';
-            } else {
-              container.style.transform = 'translateY(900px)';
-            }
-            backdrop.style.background = 'transparent';
+
+            m2Wrapper.classList.add('m2__in-transition');
             setTimeout(() => {
-              parent.removeChild(modal);
+              target.removeChild(m2Wrapper);
             }, 400);
             self._promise = null;
 
@@ -475,29 +404,27 @@
           }
         };
 
-        parent.appendChild(modal);
-        if (!embedded) {
-          modal.onclick = () => closer.close();
-        }
+        target.appendChild(m2Wrapper);
+        m2Wrapper.addEventListener('click', () => this.closer.close());
+        m2Wrapper.querySelector('.m2__close').addEventListener('click', () => this.closer.close());
 
         this._mesonToWindow = iframe.contentWindow;
-        const { dispose } = addMessageListener(this, onHeight, closer);
+        const { dispose } = addMessageListener(this, onHeight, this.closer);
 
         setTimeout(() => {
-          backdrop.style.background = '#000b';
-          if (lgScreen) {
-            content.style.opacity = '1';
-          } else {
-            container.style.transform = 'translateY(200px)';
-          }
-        }, 0);
+          m2Wrapper.classList.remove('m2__in-transition');
+        }, 50);
       });
 
       return this._promise
     }
 
     dispose () {
-      // TODO
+      if (this.closer) {
+        this.closer.close();
+      } else if (this._dispose) {
+        this._dispose();
+      }
     }
   }
 

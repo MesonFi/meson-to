@@ -1,43 +1,31 @@
 import React from 'react'
 import classnames from 'classnames'
-import PropTypes from 'prop-types'
-
-import { SUPPORTED_CHAINS } from './constants'
 import useMesonTo from './useMesonTo'
 import styles from './meson2.module.css'
 import Spinner from './spinner.svg'
+import PropTypes from 'prop-types'
 
 export default function MesonToButton ({
-  appId = 'demo',
-  to,
-  host,
-  target,
+  options = {
+    to: 'demo'
+  },
+  __host,
   onCompleted = () => {},
-  onSwapAttempted,
   className,
   children
 }) {
   const [pending, setPending] = React.useState(false)
-  const ref = React.useRef()
+  const meson2 = useMesonTo(typeof window !== 'undefined' ? window : null, __host, { onCompleted })
 
-  const meson2 = useMesonTo(typeof window !== 'undefined' ? window : null, host, { onCompleted, onSwapAttempted })
-
-  const onClick = React.useCallback((_target = target) => {
+  const onClick = React.useCallback(() => {
     setPending(true)
-    meson2?.open(to || appId, _target)
+    meson2?.open(options)
       .then(() => setPending(false))
       .catch(err => {
         console.warn(err)
         setPending(false)
       })
-  }, [meson2, appId, target, to])
-
-  React.useEffect(() => {
-    if (target === 'parent' && meson2 && ref.current) {
-      const parent = ref.current.parentElement
-      onClick(parent)
-    }
-  }, [meson2, target])
+  }, [meson2, options])
 
   let btnChildren
   if (typeof children === 'string') {
@@ -48,18 +36,9 @@ export default function MesonToButton ({
     btnChildren = pending ? 'Waiting for meson' : 'Deposit with meson'
   }
 
-  if (target === 'parent') {
-    return (
-      <div ref={ref} className={className}>
-        {pending && <Spinner className={styles['button-spinner']} />}
-        {btnChildren}
-      </div>
-    )
-  }
-
   return (
     <button
-      onClick={() => onClick()}
+      onClick={onClick}
       className={classnames(
         styles.button,
         pending && styles['button-pending'],
@@ -73,22 +52,16 @@ export default function MesonToButton ({
 }
 
 MesonToButton.propTypes = {
-  appId: PropTypes.string.isRequired,
-  to: PropTypes.shape({
-    id: PropTypes.string,
-    addr: PropTypes.string,
-    chain: PropTypes.oneOf(SUPPORTED_CHAINS),
+  options: PropTypes.shape({
+    to: PropTypes.string,
+    recipient: PropTypes.string,
+    chain: PropTypes.arrayOf(PropTypes.string),
     tokens: PropTypes.arrayOf(PropTypes.string),
     amount: PropTypes.number,
     provider: PropTypes.any
   }),
-  host: PropTypes.string,
-  target: PropTypes.oneOfType([
-    PropTypes.oneOf(['iframe', 'popup', 'parent'])
-    // PropTypes.instanceOf(window.Element)
-  ]),
+  __host: PropTypes.string,
   onCompleted: PropTypes.func.isRequired,
-  onSwapAttempted: PropTypes.func,
   className: PropTypes.string,
   children: PropTypes.node
 }

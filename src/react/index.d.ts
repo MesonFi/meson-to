@@ -20,22 +20,8 @@ export const SUPPORTED_CHAINS: readonly [
 
 export type SupportedChain = typeof SUPPORTED_CHAINS[number]
 
-export type MesonToTarget = 'iframe' | 'popup' | 'parent'
-
-export interface MesonToConfig {
-  id?: string
-  addr?: string
-  chain?: SupportedChain
-  tokens?: string[]
-  amount?: number
-  provider?: {
-    request: (params: { method: string, params?: any[] }) => Promise<any>
-  }
-}
-
 export interface UseMesonToCallbacks {
   onCompleted: (data?: any) => void
-  onSwapAttempted?: (data?: any) => void
 }
 
 export declare function useMesonTo(
@@ -45,31 +31,20 @@ export declare function useMesonTo(
 ): MesonTo | undefined
 
 export interface MesonToButtonProps {
-  appId: string
-  to?: MesonToConfig
-  host?: string
-  target?: MesonToTarget
+  options: {
+    to: string;
+    from?: ('chain' | 'cex')[]
+    recipient?: string
+    amount?: number
+    tokens?: string[]
+    provider?: {
+      request: (params: { method: string, params?: any[] }) => Promise<any>
+    }
+  }
   onCompleted: (data?: any) => void
-  onSwapAttempted?: (data?: any) => void
   className?: string
   children?: React.ReactNode
+  __host?: string
 }
 
 export declare const MesonToButton: React.FC<MesonToButtonProps>
-
-export interface MesonToEmbeddedProps {
-  appId: string
-  to?: MesonToConfig
-  host?: string
-  provider?: {
-    request: (params: { method: string, params?: any[] }) => Promise<any>
-  }
-  onCompleted: (data?: any) => void
-  onSwapAttempted?: (data?: any) => void
-  SuccessInfo?: React.ComponentType<{
-    data: any
-    onNewTransfer: () => void
-  }>
-}
-
-export declare const MesonToEmbedded: React.ComponentType<MesonToEmbeddedProps>

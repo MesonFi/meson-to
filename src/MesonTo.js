@@ -30,55 +30,34 @@ export default class MesonTo {
       this.host = opts.host
     }
     this._onCompleted = opts.onCompleted || null
-    this._onSwapAttempted = opts.onSwapAttempted || null
     this._promise = null
     this._mesonToWindow = null
   }
 
-  async open (appIdOrTo, target) {
-    if (!target) {
-      target = isMobile(this.window) ? 'iframe' : 'popup'
-    }
+  async open (options) {
+    const { to, from = ['chain', 'cex'], recipient, amount, tokens, provider } = options;
 
-    let url
-    if (typeof appIdOrTo === 'string') {
-      url = `${this.host}/${appIdOrTo}`
-    } else {
-      const { id, addr, tokens, amount, provider, ...rest } = appIdOrTo
-      url = `${this.host}/${id}`
-      if (addr) {
-        url += `/${addr}`
-      }
-      let queryList = []
-      if (tokens) {
-        queryList.push(`token=${tokens?.join(',').toLowerCase() || ''}`)
-      }
-      if (amount) {
-        queryList.push(`amount=${Number(amount) || ''}`)
-      }
-      if (provider) {
-        window.__m2_ethereum = provider
-      }
-      if (rest) {
-        queryList = queryList.concat(Object.entries(rest)
-          .filter(([k, v]) => v != null)
-          .map(([k, v]) => `${k}=${v}`)
-        )
-      }
-      if (queryList.length) {
-        url += `?${queryList.join('&')}`
-      }
+    let url = `${this.host}/${to}`
+    if (recipient) {
+      url += `/${recipient}`
     }
-
-    if (target === 'iframe') {
-      return this._openIframe(url)
-    } else if (target === 'popup') {
-      return this._openPopup(url)
-    } else if (target) {
-      return this._openIframe(url, target, true)
-    } else {
-      throw new Error(`Unknown open target: ${target}`)
+    const queryList = []
+    if (Array.isArray(from) && from.length > 0) {
+      queryList.push(`from=${from.join(',')}`)
     }
+    if (tokens) {
+      queryList.push(`token=${tokens?.join(',').toLowerCase() || ''}`)
+    }
+    if (amount) {
+      queryList.push(`amount=${Number(amount) || ''}`)
+    }
+    if (provider) {
+      window.__m2_ethereum = provider
+    }
+    if (queryList.length) {
+      url += `?${queryList.join('&')}`
+    }
+    return this._openIframe(url)
   }
 
   __postMessageToMesonTo (payload) {
@@ -95,33 +74,6 @@ export default class MesonTo {
 
   __triggerEvent (event, params) {
     this.__postMessageToMesonTo({ event, params })
-  }
-
-  _openPopup (url) {
-    if (this._promise) {
-      if (this._promise.focus) {
-        this._promise.focus()
-      }
-      return this._promise
-    }
-
-    const popup = this.window.open(url, 'meson.to', 'width=375,height=640')
-    this._mesonToWindow = popup
-    this._dispose = addMessageListener(this).dispose
-
-    this._promise = new Promise(resolve => {
-      const h = setInterval(() => {
-        if (popup.closed) {
-          this._dispose()
-          clearInterval(h)
-          this._promise = null
-          resolve()
-        }
-      }, 500)
-    })
-    this._promise.focus = () => popup.focus()
-
-    return this._promise
   }
 
   _openIframe (url, target = this.window.document.body, embedded = false) {
