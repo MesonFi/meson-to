@@ -1,13 +1,13 @@
 @mixin screen-lg {
-  @media (min-width: 440px) { @content; }
+  @media (min-width: 480px) { @content; }
 }
 
 @mixin screen-sm {
-  @media (max-width: 439px) { @content; }
+  @media (max-width: 479px) { @content; }
 }
 
 @mixin screen-lg-not-embedded {
-  @media (min-width: 440px) {
+  @media (min-width: 480px) {
     :not(.m2__embedded)>& {
       @content;
     }
@@ -15,7 +15,7 @@
 }
 
 @mixin screen-sm-not-embedded {
-  @media (max-width: 439px) {
+  @media (max-width: 479px) {
     :not(.m2__embedded)>& {
       @content;
     }
@@ -44,6 +44,10 @@
     height: 100%;
     background-color: transparent;
   }
+
+  @include screen-sm {
+    justify-content: end;
+  }
 }
 
 .m2__container {
@@ -59,13 +63,12 @@
 
   @include screen-lg-not-embedded {
     max-height: 100%;
-    overflow-y: auto;
     padding: 24px 0;
   }
 
   @include screen-sm-not-embedded {
     padding-top: 20px;
-    transform: translateY(200px);
+    // transform: translateY(200px);
     transition: transform 0.4s;
   }
 
@@ -93,19 +96,17 @@
     }
 
     :not(.m2__embedded)>& {
-      max-width: 440px;
+      max-width: 480px;
       background: #ecf5f0;
-      overflow: hidden;
       box-shadow: 0 0px 24px 0px rgb(0 0 0 / 40%);
+    }
 
-      @include screen-lg {
-        border-radius: 20px;
-      }
+    @include screen-lg {
+      border-radius: 20px;
+    }
 
-      @include screen-sm {
-        border-radius: 20px 20px 0 0;
-        padding-bottom: 200px;
-      }
+    @include screen-sm {
+      border-radius: 20px 20px 0 0;
     }
 
     &>.m2__loading {
@@ -120,9 +121,10 @@
       }
 
       @include screen-sm-not-embedded {
-        height: 592px;
+        height: 560px;
       }
     }
+    
 
     &>.m2__iframe {
       z-index: 50;
@@ -131,13 +133,20 @@
       border: none;
       transition: max-height 0.2s;
 
+      @include screen-lg {
+        border-radius: 20px;
+      }
+
+      @include screen-sm {
+        border-radius: 20px 20px 0 0;
+      }
+
       @include screen-lg-not-embedded {
-        max-height: 592px;
+        max-height: 560px;
         height: calc(100vh - 48px);
-        margin-top: -8px;
       }
       @include screen-sm-not-embedded {
-        max-height: 592px;
+        max-height: 560px;
         height: calc(100vh - 80px);
       }
     }
@@ -147,24 +156,23 @@
         &::after {
           content: '×';
           position: absolute;
-          top: 12px;
-          right: 12px;
+          top: -48px;
+          right: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 16px;
-          height: 16px;
-          border-radius: 8px;
-          font-size: 12px;
-          line-height: 12px;
+          width: 32px;
+          height: 32px;
+          border-radius: 32px;
+          font-size: 30px;
           cursor: pointer;
-          color: rgba(255, 255, 255, 0.8);
-          background-color: rgb(255, 168, 168);
-    
-          &:hover {
-            color: rgba(255, 255, 255, 0.8);
-            background-color: rgb(255, 96, 96);
-          }
+          color: white;
+          border: 2px solid white;
+
+          // &:hover {
+          //   color: rgba(255, 255, 255, 0.8);
+          //   background-color: rgb(255, 96, 96);
+          // }
         }
       }
     }

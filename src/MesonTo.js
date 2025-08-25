@@ -116,7 +116,7 @@ export default class MesonTo {
     const onHeight = height => {
       if (embedded) {
         return
-      } else if (pause && height < 592) {
+      } else if (pause && height < 560) {
         return
       }
       iframe.style['max-height'] = height + 'px'
@@ -140,7 +140,7 @@ export default class MesonTo {
             if (delta < -100) {
               delta = -100
             }
-            container.style.transform = `translateY(${200 + delta}px)`
+            container.style.transform = `translateY(${delta}px)`
           }
           bar.ontouchend = evt => {
             evt.preventDefault()
