@@ -9,7 +9,13 @@ const template = `
     <div class='m2__popup'>
       <div class='m2__loading'></div>
       <iframe class='m2__iframe'></iframe>
-      <div class='m2__close'></div>
+      <div class='m2__close'>
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="15" stroke="white" stroke-width="2"/>
+          <path d="M22.6666 22.6665L9.3333 9.33318" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M22.6666 9.3335L9.3333 22.6668" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
     </div>
     <div class='m2__bar'></div>
   </div>

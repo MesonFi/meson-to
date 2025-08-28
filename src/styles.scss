@@ -152,28 +152,12 @@
     }
 
     &>.m2__close {
-      @include screen-lg-not-embedded {
-        &::after {
-          content: '×';
-          position: absolute;
-          top: -48px;
-          right: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 32px;
-          height: 32px;
-          border-radius: 32px;
-          font-size: 30px;
-          cursor: pointer;
-          color: white;
-          border: 2px solid white;
-
-          // &:hover {
-          //   color: rgba(255, 255, 255, 0.8);
-          //   background-color: rgb(255, 96, 96);
-          // }
-        }
+      position: absolute;
+      top: -48px;
+      right: 0;
+      cursor: pointer;
+      @include screen-sm {
+        display: none;
       }
     }
   }
