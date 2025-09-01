@@ -72,6 +72,14 @@
           meson2._onCompleted?.(payload.params);
           result = true;
           break
+        case 'jump_url':
+          if (closer) {
+            dispose();
+            closer.close(true);
+          }
+          window.location.href = payload.params;
+          result = true;
+          break
       }
 
       if (typeof result !== 'undefined') {
@@ -267,7 +275,7 @@
     }
 
     async open (options) {
-      const { to, from = ['chain', 'cex'], recipient, amount, tokens, provider } = options;
+      const { to, from, recipient, amount, tokens, provider } = options;
 
       let url = `${this.host}/${to}`;
       if (recipient) {

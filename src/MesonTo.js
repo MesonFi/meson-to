@@ -41,7 +41,7 @@ export default class MesonTo {
   }
 
   async open (options) {
-    const { to, from = ['chain', 'cex'], recipient, amount, tokens, provider } = options;
+    const { to, from, recipient, amount, tokens, provider } = options;
 
     let url = `${this.host}/${to}`
     if (recipient) {

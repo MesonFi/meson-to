@@ -69,6 +69,14 @@ export default function addMessageListener (meson2, onHeight, closer) {
         meson2._onCompleted?.(payload.params)
         result = true
         break
+      case 'jump_url':
+        if (closer) {
+          dispose()
+          closer.close(true)
+        }
+        window.location.href = payload.params
+        result = true
+        break
       default:
     }
 
