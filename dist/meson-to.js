@@ -72,12 +72,12 @@
           meson2._onCompleted?.(payload.params);
           result = true;
           break
-        case 'jump_url':
+        case 'redirect_to':
           if (closer) {
             dispose();
             closer.close(true);
           }
-          window.location.href = payload.params;
+          window.location.href = payload.params?.redirectUrl;
           result = true;
           break
       }
