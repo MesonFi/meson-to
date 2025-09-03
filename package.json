@@ -1,6 +1,6 @@
 {
   "name": "@mesonfi/to",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.0-rc.2",
   "license": "MIT",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

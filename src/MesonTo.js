@@ -29,9 +29,9 @@ export default class MesonTo {
       writable: false
     })
     if (!opts.host) {
-      this.host = 'https://m2.meson.fi'
+      this.host = 'https://v2.meson.to'
     } else if (opts.host === 'testnet') {
-      this.host = 'https://testnet.meson.to'
+      this.host = 'https://beta2.meson.fi'
     } else {
       this.host = opts.host
     }
